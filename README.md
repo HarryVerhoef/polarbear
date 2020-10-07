@@ -13,7 +13,8 @@ Types in polarbear can be defined in two ways:
     polarbear enums are defined by instantiating a type variable with a set of undeclared identifiers. Once an enum type has been defined, the composing elements can be referred to by name, within scope, and the type variable itself functions in the same way as a regular set; polarbear enums are mutable and iterable.
 
     ```javascript
-    type direction = {north, east, south, west};
+    type bearfood = {roots, berries, seals, insects};
+    type colour = {black, white, red, blue};
     ```
 
     Note: It is important to remember that due to the properties of sets, ***the order of the elements is not conserved***.
@@ -41,14 +42,58 @@ Types in polarbear can be defined in two ways:
                 this.name = name;
                 this.age = age;
             }
+            string getName() {
+                return this.name;
+            }
+            void setName(string name) {
+                this.name = name;
+            }
+            posint getAge() {
+                return this.age;
+            }
+            void setAge(posint age) {
+                this.age = age;
+            }
+            
     }
     ```
     With complex types, the value set is the set of all possible instances, which is determined by the set of all possible combinations of stateful member variables. The value set for each complex type is calculated and stored implicitly. The value set of any given complex type can be obtained through the ***vset()*** method.
 
     ```javascript
     > bear.vset();
-    > {bear(a, b) : for a in string for b in posint}
+    > {bear(a,b) : for a in string for b in posint}
     ```
+
+    In contrast to simple types, type inheritance must be **explicit**, and is done like so:
+
+    ```javascript
+    type polarbear : bear {
+        private:
+            set diet = {seals};
+            colour furColour = white;
+        public:
+            polarbear(string name, posint age) {
+                this.setName(name);
+                this.setAge(age);
+            }
+            set getDiet() {
+                return this.diet;
+            }
+            colour getFurColour() {
+                return this.furColour;
+            }
+    }
+    ```
+    Any instance of the polarbear type inherits the member functions of the bear method, since it is a subtype. Moreover, the type definition of polarbear can extend the bear type with more functions and variables. Consequently, since a polarbear is still a bear, the value set of a bear must also be extended.
+
+    ```
+    > bear.vset();
+    > {
+        bear(a,b) : for a in string for b in posint,
+        polarbear(a,b) : for a in string for b in posint
+      }
+    ```
+    
 
 
 ### Built in
