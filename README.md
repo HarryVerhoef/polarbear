@@ -86,19 +86,66 @@ Types in polarbear can be defined in two ways:
     ```
     Any instance of the polarbear type inherits the member functions of the bear method, since it is a subtype. Moreover, the type definition of polarbear can extend the bear type with more functions and variables. Consequently, since a polarbear is still a bear, the value set of a bear must also be extended.
 
-    ```
+    ```javascript
     > bear.vset();
     > {
         bear(a,b) : for a in string for b in posint,
         polarbear(a,b) : for a in string for b in posint
       }
     ```
-    
 
 
-### Built in
+### Built in types
 #### Sets
- 
+
+Set-theory forms the basis for most theoretical computational mathematics. Some of the most famous and important algorithms are implemented first and foremost using sets. Sets have three main properties:
+
+ - Elements are unordered.
+ - There are no duplicate elements.
+ - Elements do not have to be of the same type.
+
+Here are some examples of different ways to define sets in polarbear:
+
+```javascript
+set emptySet = {};
+set learningAlphabet = {'a', "ab", "abc"};
+set rationals = { a/b : for a in int for b in int};
+```
+
+As is shown, sets can be intialised by specifying each individual element, or, by using a production and a set of conditions.
+
+Conveniently, there are also a load of built-in set operators in polarbear!
+
+ - Intersection: /\\
+ - Union: \\/
+ - Difference: -
+ - Cartesian product: *
+
+Here are some examples!
+
+```javascript
+> {'a', 'b', 'c'} /\ {'b', 'c', 'd'};
+> {'b', 'c'}
+```
+
+```javascript
+> {'a', 'b', 'c'} \/ {'b', 'c', 'd'};
+> {'a', 'b', 'c', 'd'}
+```
+
+```javascript
+> {'a', 'b', 'c'} - {'b', 'c', 'd'};
+> {'a'}
+```
+
+```javascript
+> {'a', 'b'} * {'b', 'c'};
+> {('a', 'b'), ('a', 'c'), ('b', 'b'), ('b', 'c')}
+```
+
+
+
+
 ### Custom
 ## Variables
 ## Functions
