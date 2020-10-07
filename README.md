@@ -96,6 +96,18 @@ Types in polarbear can be defined in two ways:
 
 
 ### Built in types
+
+There are few built-in types in polarbear, it is encouraged that users define their own as needed.
+
+ - ``` int ```
+ - ``` real ```
+ - ``` bool ```
+ - ``` char ```
+ - ``` string ```
+ - ``` set ```
+ - ``` array ```
+
+
 #### Sets
 
 Set-theory forms the basis for most theoretical computational mathematics. Some of the most famous and important algorithms are implemented first and foremost using sets. Sets have three main properties:
@@ -143,7 +155,21 @@ Here are some examples!
 > {('a', 'b'), ('a', 'c'), ('b', 'b'), ('b', 'c')}
 ```
 
+This makes it easier for us to define even more sets!
 
+```javascript
+set irrationals = real - rationals;
+```
+Note: in polarbear, all types can be used as sets!
+
+Sets can also be iterated over:
+
+```javascript
+for (x : posint) {
+    out(x);
+}
+```
+This for-loop would output all integers greater than 0.
 
 
 ### Custom
