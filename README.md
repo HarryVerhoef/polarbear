@@ -147,6 +147,7 @@ Conveniently, there are also a load of built-in set operators in polarbear!
  - ```\/``` - Union
  - ``` - ``` - Difference
  - ```*``` - Cartesian product
+ - ```in``` - is a subset/element of
 
 Here are some examples!
 
@@ -168,6 +169,16 @@ Here are some examples!
 ```javascript
 > {'a', 'b'} * {'b', 'c'};
 > {('a', 'b'), ('a', 'c'), ('b', 'b'), ('b', 'c')}
+```
+
+```javascript
+> {'a', 'b', 'c'} in {'b', 'c', 'd'};
+> false
+```
+
+```javascript
+> 'c' in {'b', 'c', 'd'};
+> true
 ```
 
 This makes it easier for us to define even more sets!
@@ -282,3 +293,23 @@ Using these two features of functions, and using the function definitions earlie
 ```
 
 To elaborate further, ```f(x) = g(h(x))``` is a true statement for all integers ```x```, and therefore ```f(x) <==> g(h(x))```. But polarbear cannot verify this, and so a subdomain must be used.
+
+##### Other comparison operators
+
+On top of the functional equivalence operator, there are some more function comparison mechanisms in polarbear:
+
+- ```>``` Greater than
+- ```>=``` Greater than or equal to
+- ```<``` Less than
+- ```<=``` Less than or equal to
+
+And again, these can be suffixed by a subdomain.
+
+```javascript
+> f > h
+> error: Cannot compare functions whose domain is infinite.
+> f >{{0,1,2,3}} h
+> false
+```
+While ```f > h``` is true for 1, 2, and 3, ```f(0) = h(0) = 2``` and so the comparison evaluates to false.
+
