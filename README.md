@@ -1,6 +1,8 @@
 # polarbear
 A C++ compiler for a fresh new mathematical language
 
+This markdown is essentially a place for syntax design decisions, and as such, the structure is quite erratic. 
+
 ## Types
 
 Types in polarbear can be defined in two ways:
@@ -23,7 +25,7 @@ Types in polarbear can be defined in two ways:
     Simple types differ from enums in that the elements of the value set are not arbitrary. These values can be literals, variables, functions, etc.
 
      ```javascript 
-     type posint = {n : for n in int where n > 0};
+     type posint = {n : for n in int where n >= 0};
      ```
 
     Note: this specific example is a good example of a type which is an implicit subtype (of the int type), since posint is a subset of int. Consequently, a posint type can be safely cast to an int.
@@ -94,6 +96,19 @@ Types in polarbear can be defined in two ways:
       }
     ```
 
+    If you really fancy yourself, you can define operators to be used with your complex type, as so:
+
+    ```javascript
+    op("+", bear b1, bear b2) {
+        return bear(b1.getName() + " jr", 0);
+    }
+    ```
+
+    Here, we have made it so that the application of the "+" operator to two bear types returns a new bear instance, with the string " jr" concatenated on to the name of the first bear, and age 0.
+
+
+
+
 
 ### Built in types
 
@@ -128,10 +143,10 @@ As is shown, sets can be intialised by specifying each individual element, or, b
 
 Conveniently, there are also a load of built-in set operators in polarbear!
 
- - Intersection: /\\
- - Union: \\/
- - Difference: -
- - Cartesian product: *
+ - ```/\``` - Intersection
+ - ```\/``` - Union
+ - ``` - ``` - Difference
+ - ```*``` - Cartesian product
 
 Here are some examples!
 
@@ -158,9 +173,13 @@ Here are some examples!
 This makes it easier for us to define even more sets!
 
 ```javascript
-set irrationals = real - rationals;
+set irr = real - rationals;
 ```
-Note: in polarbear, all types can be used as sets!
+Note: in polarbear, all types can be used as sets, and all sets can be used as types!
+
+```javascript
+type irr = irrationals;
+```
 
 Sets can also be iterated over:
 
@@ -169,9 +188,97 @@ for (x : posint) {
     out(x);
 }
 ```
-This for-loop would output all integers greater than 0.
+This for-loop would output all integers greater than or equal to 0.
+
+#### Numbers
+
+In contrast to most modern languages, which implement a set of built-in number types closely related to their literal properties (signed, double, float, etc.)
+
+In polarbear, a more abstract and mathematical approach is taken. There are two built-in number types: ```int``` and ```real```, representing integers and real numbers respectively. As is seen across this markdown document, different number types can be defined extremely concisely that more specificly define the set of numbers you desire.
+
+```javascript
+int n = 0;
+real k = 1.234;
+```
+
+#### Characters and strings
+
+Characters are single-character identifiers surrounded by single quotes:
+```javascript
+string s = "ab";
+```
+
+Characters and strings can be used together harmoniously:
+
+```javascript
+> s += 'c';
+> out(s);
+> abc
+```
+In polarbear, strings are mutable and iterable, since essentially they are an array of characters.
+
+```javascript
+for (char c : s) {
+    out(c);
+}
+```
+
+```javascript
+a
+b
+c
+```
+
+Data can be embed into strings using ```{}``` like so:
 
 
-### Custom
-## Variables
+```javascript
+> polarbear mickey = polarbear("mickey", 1);
+> out("{mickey.getName()} is a {mickey.getAge()} year old polar bear.");
+> mickey is a 1 year old polar bear.
+```
+
 ## Functions
+
+Functions in polarbear are defined like so:
+
+```javascript
+/* f(x) = x^2 + 3x + 2 */
+int f(int x) {
+    return (x ** 2) + (3 * x) + 2;
+}
+
+/* g(x) = x(x - 1) */
+int g(int x) {
+    return x * (x - 1);
+}
+
+/* h(x) = x + 2 */
+int h(int x) {
+    return x + 2;
+}
+```
+Functions are very powerful in polarbear, with features such as functional equivalence and composite functions.
+
+##### Functional Equivalence
+
+Let ```f``` and ```g``` be two functions of the same type that take the same parameters, where ```I``` denotes the set of all possible parameters. ```f``` and ```g``` are functionally equivalent over input set ```I``` if and only if for all ```i``` which is an element of ```I```, ```f(i) = g(i)```.
+
+In polarbear, the ```<==>``` operator is used to denote functional equivalence over ```I```, the set of all possible inputs.
+
+However, for functions whose ```I``` is infinite (like the functions defined earlier), a functional equivalence operator with a restricted domain is more pragmatic. This is written like ```<={J}=>```, where ```J``` is the set representing the restricted domain. Note that if ```J``` is not a subset of ```I```, an error will be thrown, since all elements of ```J``` must be valid inputs to both functions.
+
+##### Composite Functions
+
+For any two functions ```a``` and ```b```, ```a.b(x)``` is functionally equivalent to ```a(b(x))```
+
+Using these two features of functions, and using the function definitions earlier:
+```javascript
+> type someInts = {n : for n in int where n > -5000 /\ n < 5000};
+> f <==> g.h;
+> error: Cannot compare functions whose domain is infinite.
+> f <={someInts}=> g.h;
+> true
+```
+
+To elaborate further, ```f(x) = g(h(x))``` is a true statement for all integers ```x```, and therefore ```f(x) <==> g(h(x))```. But polarbear cannot verify this, and so a subdomain must be used.
