@@ -186,7 +186,7 @@ This makes it easier for us to define even more sets!
 ```javascript
 set irr = real - rationals;
 ```
-Note: in polarbear, all types can be used as sets, and all sets can be used as types!
+Note: In polarbear, all types can be used as sets, and all sets can be used as types!
 
 ```javascript
 type irr = irrationals;
@@ -271,7 +271,7 @@ int h(int x) {
 ```
 Functions are very powerful in polarbear, with features such as functional equivalence and composite functions.
 
-##### Functional Equivalence
+### Functional Equivalence
 
 Let ```f``` and ```g``` be two functions of the same type that take the same parameters, where ```I``` denotes the set of all possible parameters. ```f``` and ```g``` are functionally equivalent over input set ```I``` if and only if for all ```i``` which is an element of ```I```, ```f(i) = g(i)```.
 
@@ -279,7 +279,7 @@ In polarbear, the ```<==>``` operator is used to denote functional equivalence o
 
 However, for functions whose ```I``` is infinite (like the functions defined earlier), a functional equivalence operator with a restricted domain is more pragmatic. This is written like ```<={J}=>```, where ```J``` is the set representing the restricted domain. Note that if ```J``` is not a subset of ```I```, an error will be thrown, since all elements of ```J``` must be valid inputs to both functions.
 
-##### Composite Functions
+### Composite Functions
 
 For any two functions ```a``` and ```b```, ```a.b(x)``` is functionally equivalent to ```a(b(x))```
 
@@ -294,7 +294,7 @@ Using these two features of functions, and using the function definitions earlie
 
 To elaborate further, ```f(x) = g(h(x))``` is a true statement for all integers ```x```, and therefore ```f(x) <==> g(h(x))```. But polarbear cannot verify this, and so a subdomain must be used.
 
-##### Other comparison operators
+### Other comparison operators
 
 On top of the functional equivalence operator, there are some more function comparison mechanisms in polarbear:
 
@@ -312,4 +312,14 @@ And again, these can be suffixed by a subdomain.
 > false
 ```
 While ```f > h``` is true for 1, 2, and 3, ```f(0) = h(0) = 2``` and so the comparison evaluates to false.
+
+### Entry point
+
+In polarbear, the entry point is the **main** method, which can take no parameters, or an array of arguments, as is shown:
+
+```javascript
+void main(array<string> args) {
+    /* Code */
+}
+```
 
