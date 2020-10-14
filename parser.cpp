@@ -21,8 +21,9 @@ struct TOKEN {
     string lexeme = "";
     TOKEN_TYPE type = TOKEN_TYPE::INVALID;
     string typeString = "INVALID";
-    unsigned long intVal = 0;
-    float floatVal = 0.0;
+    string left = "";
+    string right = "";
+    bool boolVal = false;
     int lineNo = 0;
     int columnNo = 0;
 };
@@ -55,12 +56,21 @@ class AsmParseException : public exception {
         };
 };
 
-TOKEN returnTok(string lexeme, TOKEN_TYPE type, unsigned long intVal=0, float floatVal=0.0) {
+TOKEN returnTok(string lexeme, TOKEN_TYPE type, bool boolVal=false) {
     TOKEN tok;
     tok.lexeme = lexeme;
     tok.type = type;
-    tok.intVal = intVal;
-    tok.floatVal = floatVal;
+    tok.boolVal = boolVal;
+    tok.lineNo = lineNo;
+    tok.columnNo = columnNo;
+    return tok;
+}
+TOKEN returnTok(string lexeme, TOKEN_TYPE type, string left, string right) {
+    TOKEN tok;
+    tok.lexeme = lexeme;
+    tok.type = type;
+    tok.left = left;
+    tok.right = right;
     tok.lineNo = lineNo;
     tok.columnNo = columnNo;
     return tok;
@@ -118,9 +128,9 @@ static TOKEN getTok() {
         if (identStr == "for")
             return returnTok("for", TOKEN_TYPE::FOR);
         if (identStr == "while")
-            return returnTok("while", TOKEN_TYPE::WHILE)
+            return returnTok("while", TOKEN_TYPE::WHILE);
         
-
+        /* alphanumeric operators */
         if (identStr == "in")
             return returnTok("in", TOKEN_TYPE::IN);
         
@@ -128,6 +138,10 @@ static TOKEN getTok() {
         /* Syntax */
         if (identStr == "return")
             return returnTok("return", TOKEN_TYPE::RETURN);
+        if (identStr == "true")
+            return returnTok("true", TOKEN_TYPE::BOOL_LIT, true);
+        if (identStr == "false")
+            return returnTok("false", TOKEN_TYPE::BOOL_LIT);
 
         if (identStr == "main")
             return returnTok("main", TOKEN_TYPE::MAIN);
@@ -242,29 +256,12 @@ static TOKEN getTok() {
         return returnTok("=", TOKEN_TYPE::ASSIGN);
     }
 
-    if (identStr == "/\\")
-        return returnTok("/\\", TOKEN_TYPE::INTERSECT);
-    if (identStr == "\\/")
-        return returnTok("\\/", TOKEN_TYPE::UNION);
-    if (identStr == ">=")
-        return returnTok(">=", TOKEN_TYPE::GEQ);
-    if (identStr == "<=")
-        return returnTok("<=", TOKEN_TYPE::LEQ);
-    if (identStr == "<==>")
-        return returnTok("<==>", TOKEN_TYPE::EQUIV);
-    
-
     /* Return ident if none of ops match, and during parse can check optable for ident lexvals when expecting ops */
 
     if (lastChar == '.') {
         lastChar = getc(pFile);
         columnNo++;
         return returnTok(".", TOKEN_TYPE::DOT);
-    }
-    if (lastChar == '$') {
-        lastChar = getc(pFile);
-        columnNo++;
-        return returnTok("$", TOKEN_TYPE::DOLLAR);
     }
     if (lastChar == '%') {
         lastChar = getc(pFile);
@@ -291,41 +288,27 @@ static TOKEN getTok() {
         columnNo++;
         return returnTok(")", TOKEN_TYPE::RPAR);
     }
-    if (lastChar == '-') {
-        lastChar = getc(pFile);
-        columnNo++;
-        return returnTok("-", TOKEN_TYPE::MINUS);
-    }
+
     
+    /* int or real literals */
     if (isdigit(lastChar)) {
-        string numStr = "";
+        string l = "";
+        string r = "";
+
         do {
-            numStr += lastChar;
+            l += lastChar;
             lastChar = getc(pFile);
             columnNo++;
         } while (isdigit(lastChar));
         
-        if (isalnum(lastChar)) {
-            do {
-                numStr += lastChar;
-                lastChar = getc(pFile);
+        if (lastChar == '.') {
+            while (isdigit(lastChar = getc(pFile))) {
+                r += lastChar;
                 columnNo++;
-            } while (isalnum(lastChar) || lastChar == '_');
-
-            if (numStr == "4byte_literals")
-                return returnTok("4byte_literals", TOKEN_TYPE::B_L_4);
-            if (numStr == "8byte_literals")
-                return returnTok("8byte_literals", TOKEN_TYPE::B_L_8);
-            if (numStr == "0x90")
-                return returnTok("0x90", TOKEN_TYPE::NOP);
-
-            cout << "INVALID: " << numStr;
-            
-        } else {
-            return returnTok(numStr, TOKEN_TYPE::INT_LIT, stoul(numStr));
+            }
+            return returnTok(r, TOKEN_TYPE::REAL_LIT, l, r);
         }
-
-        
+        return returnTok(l, TOKEN_TYPE::INT_LIT, l, r);
     }
 
     if (lastChar == EOF) {
@@ -335,7 +318,7 @@ static TOKEN getTok() {
 
     // If token unidentifiable then return lastChar and ascii value
     
-    return returnTok("INVALID", TOKEN_TYPE::INVALID);
+    return returnTok("UNKNOWN", TOKEN_TYPE::UNKNOWN);
 
 }
 
