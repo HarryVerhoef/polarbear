@@ -147,7 +147,7 @@ Conveniently, there are also a load of built-in set operators in polarbear!
  - ```\/``` - Union
  - ``` - ``` - Difference
  - ```*``` - Cartesian product
- - ```in``` - is a subset/element of
+ - ```in``` - is a subset/subarray/element of
 
 Here are some examples!
 

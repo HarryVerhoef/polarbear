@@ -109,224 +109,152 @@ static TOKEN getTok() {
             return returnTok("array", TOKEN_TYPE::ARRAY);
         
         /* If type but none of these types then return ident and check while parsing whether or not ident has been typedeffed */
-
-        if (identStr == "al")
-            return returnTok("al", TOKEN_TYPE::AL);
-        if (identStr == "cl")
-            return returnTok("cl", TOKEN_TYPE::CL);
-        if (identStr == "dl")
-            return returnTok("dl", TOKEN_TYPE::DL);
-        if (identStr == "dil")
-            return returnTok("dil", TOKEN_TYPE::DIL);
-        if (identStr == "rax")
-            return returnTok("rax", TOKEN_TYPE::RAX);
-        if (identStr == "rcx")
-            return returnTok("rcx", TOKEN_TYPE::RCX);
-        if (identStr == "rbp")
-            return returnTok("rbp", TOKEN_TYPE::RBP);
-        if (identStr == "rsp")
-            return returnTok("rsp", TOKEN_TYPE::RSP);
-        if (identStr == "rip")
-            return returnTok("rip", TOKEN_TYPE::RIP);
-        if (identStr == "eax")
-            return returnTok("eax", TOKEN_TYPE::EAX);
-        if (identStr == "ecx")
-            return returnTok("ecx", TOKEN_TYPE::ECX);
-        if (identStr == "edx")
-            return returnTok("edx", TOKEN_TYPE::EDX);
-        if (identStr == "edi")
-            return returnTok("edi", TOKEN_TYPE::EDI);
-        if (identStr == "esi")
-            return returnTok("esi", TOKEN_TYPE::ESI);
-        if (identStr == "r8b")
-            return returnTok("r8b", TOKEN_TYPE::R8B);
-        if (identStr == "r8w")
-            return returnTok("r8w", TOKEN_TYPE::R8W);
-        if (identStr == "r8d")
-            return returnTok("r8d", TOKEN_TYPE::R8D);
-        if (identStr == "sil")
-            return returnTok("sil", TOKEN_TYPE::SIL);
-        if (identStr == "xmm0")
-            return returnTok("xmm0", TOKEN_TYPE::XMM0);
-        if (identStr == "xmm1")
-            return returnTok("xmm1", TOKEN_TYPE::XMM1);
-        if (identStr == "xmm2")
-            return returnTok("xmm2", TOKEN_TYPE::XMM2);
-        if (identStr == "xmm3")
-            return returnTok("xmm3", TOKEN_TYPE::XMM3);
-        if (identStr == "xmm4")
-            return returnTok("xmm4", TOKEN_TYPE::XMM4);
-        if (identStr == "xmm5")
-            return returnTok("xmm5", TOKEN_TYPE::XMM5);
-        if (identStr == "xmm6")
-            return returnTok("xmm6", TOKEN_TYPE::XMM6);
-        if (identStr == "xmm7")
-            return returnTok("xmm7", TOKEN_TYPE::XMM7);
-        if (identStr == "xmm8")
-            return returnTok("xmm8", TOKEN_TYPE::XMM8);
-        if (identStr == "xmm9")
-            return returnTok("xmm9", TOKEN_TYPE::XMM9);
-        if (identStr == "xmm10")
-            return returnTok("xmm10", TOKEN_TYPE::XMM10);
-
-
-
-
-        if (identStr == "movb")
-            return returnTok("movb", TOKEN_TYPE::MOVB);
-        if (identStr == "movl")
-            return returnTok("movl", TOKEN_TYPE::MOVL);
-        if (identStr == "movd")
-            return returnTok("movd", TOKEN_TYPE::MOVD);
-        if (identStr == "movq")
-            return returnTok("movq", TOKEN_TYPE::MOVQ);
-        if (identStr == "movss")
-            return returnTok("movss", TOKEN_TYPE::MOVSS);
-        if (identStr == "movsd")
-            return returnTok("movsd", TOKEN_TYPE::MOVSD);
-        if (identStr == "movzbl")
-            return returnTok("movzbl", TOKEN_TYPE::MOVZBL);
-        if (identStr == "movaps")
-            return returnTok("movaps", TOKEN_TYPE::MOVAPS);
-        if (identStr == "movabsq")
-            return returnTok("movabsq", TOKEN_TYPE::MOVABSQ);
-        if (identStr == "pushq")
-            return returnTok("pushq", TOKEN_TYPE::PUSH);
-        if (identStr == "popq")
-            return returnTok("popq", TOKEN_TYPE::POP);
-        if (identStr == "addq")
-            return returnTok("addq", TOKEN_TYPE::ADD);
-        if (identStr == "addl")
-            return returnTok("addl", TOKEN_TYPE::ADDL);
-        if (identStr == "addss")
-            return returnTok("addss", TOKEN_TYPE::ADDSS);
-        if (identStr == "addsd")
-            return returnTok("addsd", TOKEN_TYPE::ADDSD);
-        if (identStr == "subq")
-            return returnTok("subq", TOKEN_TYPE::SUB);
-        if (identStr == "subl")
-            return returnTok("subl", TOKEN_TYPE::SUBL);
-        if (identStr == "subss")
-            return returnTok("subss", TOKEN_TYPE::SUBSS);
-        if (identStr == "subsd")
-            return returnTok("subsd", TOKEN_TYPE::SUBSD);
-        if (identStr == "idivl")
-            return returnTok("idivl", TOKEN_TYPE::IDIVL);
-        if (identStr == "divss")
-            return returnTok("divss", TOKEN_TYPE::DIVSS);
-        if (identStr == "divsd")
-            return returnTok("divsd", TOKEN_TYPE::DIVSD);
-        if (identStr == "imull")
-            return returnTok("imull", TOKEN_TYPE::IMULL);
-        if (identStr == "mulss")
-            return returnTok("mulss", TOKEN_TYPE::MULSS);
-        if (identStr == "mulsd")
-            return returnTok("mulsd", TOKEN_TYPE::MULSD);
-        if (identStr == "sete")
-            return returnTok("sete", TOKEN_TYPE::SETE);
-        if (identStr == "setne")
-            return returnTok("setne", TOKEN_TYPE::SETNE);
-        if (identStr == "and")
-            return returnTok("and", TOKEN_TYPE::AND);
-        if (identStr == "andb")
-            return returnTok("andb", TOKEN_TYPE::ANDB);
-        if (identStr == "andl")
-            return returnTok("andl", TOKEN_TYPE::ANDL);
-        if (identStr == "or")
-            return returnTok("or", TOKEN_TYPE::OR);
-        if (identStr == "testb")
-            return returnTok("testb", TOKEN_TYPE::TEST);
-        if (identStr == "xor")
-            return returnTok("xor", TOKEN_TYPE::XOR); // Does this exist?
-        if (identStr == "xorb")
-            return returnTok("xorb", TOKEN_TYPE::XORB);
-        if (identStr == "xorl")
-            return returnTok("xorl", TOKEN_TYPE::XORL); // Does there exist an XORD, XORQ?
-        if (identStr == "shll")
-            return returnTok("shll", TOKEN_TYPE::SHLL);
-
-        if (identStr == "jmp")
-            return returnTok("jmp", TOKEN_TYPE::JUMP);
-        if (identStr == "je")
-            return returnTok("je", TOKEN_TYPE::JE);
-        if (identStr == "jne")
-            return returnTok("jne", TOKEN_TYPE::JNE);
-        if (identStr == "jz")
-            return returnTok("jz", TOKEN_TYPE::JZ);
-        if (identStr == "jg")
-            return returnTok("jg", TOKEN_TYPE::JG);
-        if (identStr == "jge")
-            return returnTok("jge", TOKEN_TYPE::JGE);
-        if (identStr == "jl")
-            return returnTok("jl", TOKEN_TYPE::JL);
-        if (identStr == "jle")
-            return returnTok("jle", TOKEN_TYPE::JLE);
-        if (identStr == "cmp")
-            return returnTok("cmp", TOKEN_TYPE::CMP);
-        if (identStr == "cmpl")
-            return returnTok("cmpl", TOKEN_TYPE::CMPL);
-        if (identStr == "callq")
-            return returnTok("callq", TOKEN_TYPE::CALL);
-        if (identStr == "retq")
-            return returnTok("retq", TOKEN_TYPE::RET);
-        if (identStr == "cvtss2sd")
-            return returnTok("cvtss2sd", TOKEN_TYPE::CVTSS2SD);
-        if (identStr == "cvtsd2ss")
-            return returnTok("cvtsd2ss", TOKEN_TYPE::CVTSD2SS);
-        if (identStr == "cltd")
-            return returnTok("cltd", TOKEN_TYPE::CLTD);
+        
+        /* Statements */
+        if (identStr == "if")
+            return returnTok("if", TOKEN_TYPE::IF);
+        if (identStr == "else")
+            return returnTok("else", TOKEN_TYPE::ELSE);
+        if (identStr == "for")
+            return returnTok("for", TOKEN_TYPE::FOR);
+        if (identStr == "while")
+            return returnTok("while", TOKEN_TYPE::WHILE)
         
 
-        if (identStr == "section")
-            return returnTok("section", TOKEN_TYPE::SECTION);
-        if (identStr == "regular")
-            return returnTok("regular", TOKEN_TYPE::REGULAR);
-        if (identStr == "pure_instructions")
-            return returnTok("pure_instructions", TOKEN_TYPE::P_I);
-        if (identStr == "build_version")
-            return returnTok("build_version", TOKEN_TYPE::B_V);
-        if (identStr == "macos")
-            return returnTok("macos", TOKEN_TYPE::MACOS);
-        if (identStr == "sdk_version")
-            return returnTok("sdk_version", TOKEN_TYPE::SDK_V);
-        if (identStr == "globl")
-            return returnTok("globl", TOKEN_TYPE::GLOBAL);
-        if (identStr == "retq")
-            return returnTok("retq", TOKEN_TYPE::RET);
-        if (identStr == "quad")
-            return returnTok("quad", TOKEN_TYPE::QUAD);
-        if (identStr == "long")
-            return returnTok("long", TOKEN_TYPE::LONG);
+        if (identStr == "in")
+            return returnTok("in", TOKEN_TYPE::IN);
         
-        
-        if (identStr == "p2align")
-            return returnTok("p2align", TOKEN_TYPE::ALIGN);
-        if (identStr == "zerofill")
-            return returnTok("zerofill", TOKEN_TYPE::ZEROFILL);
-        if (identStr == "__DATA")
-            return returnTok("__DATA", TOKEN_TYPE::DATA);
-        if (identStr == "subsections_via_symbols")
-            return returnTok("subsections_via_symbols", TOKEN_TYPE::S_V_S);
 
-        if (identStr == "__TEXT")
-            return returnTok("__TEXT", TOKEN_TYPE::TEXT_CAPS);
-        if (identStr == "__text")
-            return returnTok("__text", TOKEN_TYPE::TEXT_LOWER);
-        if (identStr == "__common")
-            return returnTok("common", TOKEN_TYPE::COMMON);
-        if (identStr == "c")
-            return returnTok("c", TOKEN_TYPE::C);
-        if (identStr == "__literal4")
-            return returnTok("__literal4", TOKEN_TYPE::LITERAL_4);
-        if (identStr == "__literal8")
-            return returnTok("__literal8", TOKEN_TYPE::LITERAL_8);
-        
-        if (identStr == "_main")
-            return returnTok("_main", TOKEN_TYPE::MAIN);
+        /* Syntax */
+        if (identStr == "return")
+            return returnTok("return", TOKEN_TYPE::RETURN);
+
+        if (identStr == "main")
+            return returnTok("main", TOKEN_TYPE::MAIN);
         
         return returnTok("IDENT - " + identStr, TOKEN_TYPE::IDENT);
 
     }
+
+    /* Operators */
+    if (lastChar == '/') {
+        nextChar = getc(pFile);
+        if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("/=", TOKEN_TYPE::DEQ);
+        } else if (nextChar == '\\') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("/\\", TOKEN_TYPE::INTERSECT);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("/", TOKEN_TYPE::DIV);
+    }
+    if (lastChar == '\\') {
+        nextChar = getc(pFile);
+        if (nextChar == '/') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("\\/", TOKEN_TYPE::UNION);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("\\", TOKEN_TYPE::BACKSLASH);
+    }
+    if (lastChar == '*') {
+        nextChar = getc(pFile);
+        if (nextChar == '*') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("**", TOKEN_TYPE::EXP);
+        } else if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("*=", TOKEN_TYPE::TEQ);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("*", TOKEN_TYPE::TIMES);
+    }
+    if (lastChar == '+') {
+        nextChar = getc(pFile);
+        if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("+=", TOKEN_TYPE::PEQ);
+        } else if (nextChar == '+') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("++", TOKEN_TYPE::INCREMENT);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("+", TOKEN_TYPE::ADD);
+    }
+    if (lastChar == '-') {
+        nextChar = getc(pFile);
+        if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("-=", TOKEN_TYPE::MEQ);
+        } else if (nextChar == '-') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("--", TOKEN_TYPE::DECREMENT);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("-", TOKEN_TYPE::MINUS);
+    }
+    if (lastChar == '>') {
+        nextChar = getc(pFile);
+        if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok(">=", TOKEN_TYPE::GEQ);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok(">", TOKEN_TYPE::GT);
+    }
+    if (lastChar == '<') {
+        nextChar = getc(pFile);
+        if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("<=", TOKEN_TYPE::LEQ);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("<", TOKEN_TYPE::LT);
+    }
+    if (lastChar == '=') {
+        nextChar = getc(pFile);
+        if (nextChar == '=') {
+            lastChar = getc(pFile);
+            columnNo += 2;
+            return returnTok("==", TOKEN_TYPE::EQUAL);
+        }
+        lastChar = nextChar;
+        columnNo++;
+        return returnTok("=", TOKEN_TYPE::ASSIGN);
+    }
+
+    if (identStr == "/\\")
+        return returnTok("/\\", TOKEN_TYPE::INTERSECT);
+    if (identStr == "\\/")
+        return returnTok("\\/", TOKEN_TYPE::UNION);
+    if (identStr == ">=")
+        return returnTok(">=", TOKEN_TYPE::GEQ);
+    if (identStr == "<=")
+        return returnTok("<=", TOKEN_TYPE::LEQ);
+    if (identStr == "<==>")
+        return returnTok("<==>", TOKEN_TYPE::EQUIV);
+    
+
+    /* Return ident if none of ops match, and during parse can check optable for ident lexvals when expecting ops */
 
     if (lastChar == '.') {
         lastChar = getc(pFile);
