@@ -236,7 +236,19 @@ static TOKEN getTok() {
     if (lastChar == '<') {
         nextChar = getc(pFile);
         if (nextChar == '=') {
-            lastChar = getc(pFile);
+            nextChar = getc(pFile);
+            if (nextChar == '=') {
+                nextChar = getc(pFile);
+                if (nextChar == '>') {
+                    lastChar = getc(pFile);
+                    columnNo += 4;
+                    return returnTok("<==>", TOKEN_TYPE::EQUIV);
+                }
+                lastChar = nextChar;
+                columnNo += 3;
+                return returnTok("<==", TOKEN_TYPE::UNKNOWN);
+            }
+            lastChar = nextChar;
             columnNo += 2;
             return returnTok("<=", TOKEN_TYPE::LEQ);
         }
@@ -247,7 +259,13 @@ static TOKEN getTok() {
     if (lastChar == '=') {
         nextChar = getc(pFile);
         if (nextChar == '=') {
-            lastChar = getc(pFile);
+            nextChar = getc(pFile);
+            if (nextChar == '>') {
+                lastChar = getc(pFile);
+                columnNo += 3;
+                return returnTok("==>", TOKEN_TYPE::IMPLIES);
+            }
+            lastChar = nextChar;
             columnNo += 2;
             return returnTok("==", TOKEN_TYPE::EQUAL);
         }
@@ -369,7 +387,12 @@ static TOKEN getTok() {
 ** WhileStmt -> while ( Expr ) { Block } ;
 **
 ** Expr -> Type ident = Expr ;
-**       | Or 
+**       | Logic
+**
+** Logic -> Or LogicP
+** LogicP -> <==> Or LogicP
+**         | <= { Set } => Or LogicP
+**         | ==> Or LogicP
 **
 ** Or -> And OrP
 ** OrP -> \/ And OrP
@@ -420,6 +443,7 @@ static TOKEN getTok() {
 **       | char_lit
 **       | string_lit
 **       | Set
+**       | Array
 **
 ** TermP -> ( Args )
 **        | e
@@ -430,4 +454,22 @@ static TOKEN getTok() {
 ** Args_list -> Expr Args_listP
 ** Args_listP -> , Expr Args_listP
 **             | e
+**
+** Set -> { }
+**      | { Args_list }
+**      | type
+**      | ident
+**      | { Expr : Iterators : Expr }
+**
+** Iterators -> for ident in Iterator Iterators
+**            | e
+**
+** Iterator -> Set
+**           | Array
+**           | <other iterator subtypes>
+**
+** Array -> []
+**        | [ Args_list ]
+**        | ident
+**        | [ Expr : Iterators : Expr ]
 */
