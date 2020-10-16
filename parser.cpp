@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <deque>
 #include "parser.h"
 
 using namespace std;
@@ -36,13 +36,13 @@ int columnNo = 0;
 string identStr = "";
 bool parsedMain = false;
 
-class AsmParseException : public exception {
+class PolarParseException : public exception {
     private:
         string expected = "";
     public:
-        AsmParseException(const char* e) : expected("'" + string(e) + "'") {};
-        AsmParseException(string e) : expected("'" + e + "'") {};
-        AsmParseException(const vector<TOKEN_TYPE>& e) {
+        PolarParseException(const char* e) : expected("'" + string(e) + "'") {};
+        PolarParseException(string e) : expected("'" + e + "'") {};
+        PolarParseException(const vector<TOKEN_TYPE>& e) {
             if (expected.size() != 0)
                 expected = "'" + tokToLex(e[0]) + "'";
             for (int i=1; i < e.size(); i++) {
@@ -50,7 +50,7 @@ class AsmParseException : public exception {
             }
         }
         const char* what() const throw() {
-            string eString = "AsmParseException: Got '" + curTok.lexeme + "', expected " + expected;
+            string eString = "PolarParseException: Got '" + curTok.lexeme + "', expected " + expected;
             eString +=  " at " + to_string(curTok.lineNo) + ":" + to_string(curTok.columnNo);
             return eString.c_str();
         };
@@ -337,10 +337,37 @@ static TOKEN getTok() {
     // If token unidentifiable then return lastChar and ascii value
     
     return returnTok("UNKNOWN", TOKEN_TYPE::UNKNOWN);
+}
 
+static TOKEN getNextToken() {
+    if (tok_buffer.size() == 0)
+        tok_buffer.push_back(getTok());
+    
+    TOKEN temp = tok_buffer.front();
+    tok_buffer.pop_front();
+
+    return curTok = temp;
 }
 
 
+int main(int argc, char **argv) {
+    
+    int lineNo = 1;
+    int columnNo = 1;
+    string filename = string(argv[1]);
+    pFile = fopen(filename.c_str(), "r");
+    if (pFile == NULL) {
+        cout << "Null file";
+        return 1;
+    }
+
+
+    do {
+        getNextToken();
+        cout << "Token: " << curTok.lexeme;
+    } while (curTok.type != TOKEN_TYPE::E_O_F);
+
+}
 
 
 /*
