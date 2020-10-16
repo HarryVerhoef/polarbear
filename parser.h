@@ -3,6 +3,7 @@
 
 
 enum class TOKEN_TYPE {
+    EOL,
     INT,
     REAL,
     BOOL,
@@ -55,6 +56,8 @@ enum class TOKEN_TYPE {
 
 std::string tokToLex(TOKEN_TYPE t) {
     switch (t) {
+        case TOKEN_TYPE::EOL:
+            return "EOL";
         case TOKEN_TYPE::INT:
             return "int";
         case TOKEN_TYPE::REAL:

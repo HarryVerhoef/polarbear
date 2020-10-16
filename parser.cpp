@@ -19,7 +19,7 @@ bool isElem(T& e, const vector<T>& v) {
 
 struct TOKEN {
     string lexeme = "";
-    TOKEN_TYPE type = TOKEN_TYPE::INVALID;
+    TOKEN_TYPE type = TOKEN_TYPE::UNKNOWN;
     string typeString = "INVALID";
     string left = "";
     string right = "";
@@ -42,13 +42,6 @@ class PolarParseException : public exception {
     public:
         PolarParseException(const char* e) : expected("'" + string(e) + "'") {};
         PolarParseException(string e) : expected("'" + e + "'") {};
-        PolarParseException(const vector<TOKEN_TYPE>& e) {
-            if (expected.size() != 0)
-                expected = "'" + tokToLex(e[0]) + "'";
-            for (int i=1; i < e.size(); i++) {
-                expected += " or '" + tokToLex(e[i]) + "'";
-            }
-        }
         const char* what() const throw() {
             string eString = "PolarParseException: Got '" + curTok.lexeme + "', expected " + expected;
             eString +=  " at " + to_string(curTok.lineNo) + ":" + to_string(curTok.columnNo);
@@ -335,6 +328,8 @@ static TOKEN getTok() {
     }
 
     // If token unidentifiable then return lastChar and ascii value
+
+    lastChar = getc(pFile);
     
     return returnTok("UNKNOWN", TOKEN_TYPE::UNKNOWN);
 }
@@ -361,10 +356,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    cout << "Lexing " << filename << "\n";
+
 
     do {
         getNextToken();
-        cout << "Token: " << curTok.lexeme;
+        cout << "Token: " << curTok.lexeme << "\n";
     } while (curTok.type != TOKEN_TYPE::E_O_F);
 
 }
