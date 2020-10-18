@@ -1,5 +1,6 @@
 #include <iostream>
 #include <deque>
+#include <vector>
 #include "parser.h"
 
 using namespace std;
@@ -73,6 +74,14 @@ TOKEN returnTok(string lexeme, TOKEN_TYPE type, string left, string right) {
 static TOKEN getTok() {
     static int lastChar = ' ';
     static int nextChar = ' ';
+    static bool embed = false; /* Used to determine whether to return futureToks yet */
+    static deque<TOKEN> futureToks = {}; /* Used for when expressions are embed in strings */
+
+    if (!embed && futureToks.size()) {
+        TOKEN t = futureToks[0];
+        futureToks.pop_front();
+        return t;
+    }
 
     // Skip whitespace
     while (isspace(lastChar)) {
@@ -299,7 +308,54 @@ static TOKEN getTok() {
         columnNo++;
         return returnTok(")", TOKEN_TYPE::RPAR);
     }
+    if (lastChar == '\'') {
+        lastChar = getc(pFile);
+        columnNo++;
+        return returnTok("'", TOKEN_TYPE::SQUOTE);
+    }
+    if (lastChar == '{') {
+        lastChar = getc(pFile);
+        columnNo++;
+        return returnTok("{", TOKEN_TYPE::LBRA);
+    }
+    if (lastChar == '}') {
+        lastChar = getc(pFile);
+        columnNo++;
+        return returnTok("}", TOKEN_TYPE::RBRA);
+    }
 
+    if (lastChar == '"') {
+        TOKEN q1 = returnTok("\"", TOKEN_TYPE::DQUOTE);
+        futureToks.push_back(q1);
+        lastChar = getc(pFile);
+        while (lastChar != '"') {
+            if (lastChar == '{') {
+                embed = true;
+                while (lastChar != '}') {
+                    TOKEN tok = getTok();
+                    futureToks.push_back(tok);
+                }
+                embed = false;
+                TOKEN rbra = returnTok("}", TOKEN_TYPE::RBRA);
+                futureToks.push_back(rbra);
+                columnNo++;
+            } else {
+                TOKEN c = returnTok(string(1,lastChar), TOKEN_TYPE::STRING_LIT);
+                futureToks.push_back(c);
+                columnNo++;
+            }
+            lastChar = getc(pFile);
+        }
+        TOKEN q2 = returnTok("\"", TOKEN_TYPE::DQUOTE);
+        futureToks.push_back(q2);
+        lastChar = getc(pFile);
+    }
+
+    if (!embed && futureToks.size() > 0) {
+        TOKEN t = futureToks[0];
+        futureToks.pop_front();
+        return t;
+    }
     
     /* int or real literals */
     if (isdigit(lastChar)) {

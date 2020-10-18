@@ -50,6 +50,11 @@ enum class TOKEN_TYPE {
     RPAR,
     REAL_LIT,
     INT_LIT,
+    SQUOTE,
+    DQUOTE,
+    LBRA,
+    RBRA,
+    STRING_LIT,
     E_O_F,
     UNKNOWN
 };
@@ -150,6 +155,16 @@ std::string tokToLex(TOKEN_TYPE t) {
             return "real_lit";
         case TOKEN_TYPE::INT_LIT:
             return "int_lit";
+        case TOKEN_TYPE::SQUOTE:
+            return "'";
+        case TOKEN_TYPE::DQUOTE:
+            return "\"";
+        case TOKEN_TYPE::LBRA:
+            return "{";
+        case TOKEN_TYPE::RBRA:
+            return "}";
+        case TOKEN_TYPE::STRING_LIT:
+            return "string_lit";
         case TOKEN_TYPE::E_O_F:
             return "EOF";
         case TOKEN_TYPE::UNKNOWN:
