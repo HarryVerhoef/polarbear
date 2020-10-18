@@ -46,6 +46,9 @@ enum class TOKEN_TYPE {
     PERCENT,
     COMMA,
     COLON,
+    SEMICOLON,
+    LSBRA,
+    RSBRA,
     LPAR,
     RPAR,
     REAL_LIT,
@@ -147,6 +150,8 @@ std::string tokToLex(TOKEN_TYPE t) {
             return ",";
         case TOKEN_TYPE::COLON:
             return ":";
+        case TOKEN_TYPE::SEMICOLON:
+            return ";";
         case TOKEN_TYPE::LPAR:
             return "(";
         case TOKEN_TYPE::RPAR:
@@ -163,6 +168,10 @@ std::string tokToLex(TOKEN_TYPE t) {
             return "{";
         case TOKEN_TYPE::RBRA:
             return "}";
+        case TOKEN_TYPE::LSBRA:
+            return "[";
+        case TOKEN_TYPE::RSBRA:
+            return "]";
         case TOKEN_TYPE::STRING_LIT:
             return "string_lit";
         case TOKEN_TYPE::E_O_F:

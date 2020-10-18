@@ -298,6 +298,11 @@ static TOKEN getTok() {
         columnNo++;
         return returnTok(":", TOKEN_TYPE::COLON);
     }
+    if (lastChar == ';') {
+        lastChar = getc(pFile);
+        columnNo++;
+        return returnTok(";", TOKEN_TYPE::SEMICOLON);
+    }
     if (lastChar == '(') {
         lastChar = getc(pFile);
         columnNo++;
@@ -322,6 +327,16 @@ static TOKEN getTok() {
         lastChar = getc(pFile);
         columnNo++;
         return returnTok("}", TOKEN_TYPE::RBRA);
+    }
+    if (lastChar == '[') {
+        lastChar = getc(pFile);
+        columnNo++;
+        return returnTok("[", TOKEN_TYPE::LSBRA);
+    }
+    if (lastChar == ']') {
+        lastChar = getc(pFile);
+        columnNo++;
+        return returnTok("]", TOKEN_TYPE::RSBRA);
     }
 
     if (lastChar == '"') {
