@@ -163,6 +163,21 @@ static TOKEN getTok() {
             lastChar = getc(pFile);
             columnNo += 2;
             return returnTok("/\\", TOKEN_TYPE::INTERSECT);
+        } else if (nextChar == '*') {
+            while (lastChar != EOF) {
+                lastChar = getc(pFile);
+                if (lastChar == '*') {
+                    nextChar = getc(pFile);
+                    if (nextChar == '/') {
+                        lastChar = getc(pFile);
+                        columnNo++;
+                        return getTok();
+                    }
+                    lastChar = nextChar;
+                    columnNo++;
+                }
+                columnNo++;
+            }
         }
         lastChar = nextChar;
         columnNo++;
