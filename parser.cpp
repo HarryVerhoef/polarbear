@@ -2,6 +2,7 @@
 #include <deque>
 #include <vector>
 #include "parser.h"
+#include "ast.cpp"
 
 using namespace std;
 
@@ -428,6 +429,16 @@ static TOKEN getNextToken() {
     tok_buffer.pop_front();
 
     return curTok = temp;
+}
+
+
+/* parser: adds context to the program */
+
+
+
+
+unique_ptr<program> parser() {
+
 }
 
 
