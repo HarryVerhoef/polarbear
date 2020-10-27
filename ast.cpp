@@ -45,13 +45,15 @@ class stype : public type {
 class ctype : public type {
     private:
         type supertype;
-        vector<varsig> variables = {};
-        vector<funcsig> functions = {};
+        unique_ptr<vector<unique_ptr<complexblock>>> complexes;
     public:
-        ctype(string& i, vector<varsig>& vs, vector<funcsig>& fs) {
+        ctype(string& i, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
             this->setIdent(i);
-            variables = vs;
-            functions = fs;
+            this->setType(i);
+            /*
+            ** iterate through complexes adding var and func sigs
+            ** if come to a constructor then use to construct vset along with varsigs?
+            */
         };
 };
 
@@ -359,6 +361,17 @@ class variable : public def {
         };
 };
 
+class complexblock : public def {
+    private:
+        ACCESS access = ACCESS::PRIVATE;
+        unique_ptr<vector<unique_ptr<def>>> defs = {};
+    public:
+        complexblock(ACCESS a, unique_ptr<vector<unique_ptr<def>>>& d) {
+            access = a;
+            defs = move(d);
+        };
+};
+
 class tdef : public def {
     private:
         string ident = "";
@@ -373,10 +386,19 @@ class tdef : public def {
 
 class simpletdef : public tdef {
     public:
-        simpletdef(string i, unique_ptr<polarset> s) {
-            type simple = stype(i, p);
+        simpletdef(string i, unique_ptr<polarset>& s) {
+            type simple = stype(i, move(p));
             this->setIdent(i);
             this->setNewType(simple.getType(i));
+        };
+};
+
+class complextdef : public tdef {
+    public:
+        complextdef(string i, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
+            type complex = ctype(i, move(cs));
+            this->setIdent(i);
+            this->setNewType(complex.getType(i));
         };
 };
 

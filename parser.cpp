@@ -476,13 +476,24 @@ unique_ptr<tdef> tdef_parse() {
 
             if (curTok.type != TOKEN_TYPE::SEMICOLON)
                 throw PolarParseException(";");
-            return make_unique<type>(new simpletdef(tdefident, vset));
+            return make_unique<tdef>(new simpletdef(tdefident, vset));
         };
         case TOKEN_TYPE::LBRA: {
             /* complex type without inheritance */
             getNextToken();
 
-        }
+            unique_ptr<vector<unique_ptr<complexblock>>> cblocks = complex_type();
+
+            if (curTok.type != TOKEN_TYPE::RBRA)
+                throw PolarParseException("}");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            return make_unique<tdef>(new complextdef(tdefident, cblock));
+        };
     };
 };
 
