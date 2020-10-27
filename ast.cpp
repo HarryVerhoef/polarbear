@@ -1,38 +1,44 @@
 #include <unordered_map>
+#include <set>
+#include <unordered_set>
 #include "ast.h"
 using namespace std;
-
-
 
 class type {
     private:
         static unordered_map<string, shared_ptr<type>> typemap;
+        static unordered_set<string> typenames;
         string ident = "";
         int length = 0;
-        set vset = set();
+        set<string> vset = {};
         vector<funcsig> funcsigs = {};
         vector<varsig> varsigs = {};
         vector<opsig> opsigs = {};
 
     public:
-        type(string& i) { typemap[i] = make_shared<type>(*this); };
+        type() {};
+        type(string i) { this->setType(i); };
+        void setType(string& i) {
+            typemap[i] = make_shared<type>(*this);
+            typenames.insert(i);
+        };
         shared_ptr<type> getType(string s) { return typemap[s]; };
-        set vset() { return vset; };
+        set<string> getVset() { return vset; };
         string getIdent() { return ident; };
         void setIdent(string& i) { ident = i; };
-        void setVset(set& s) { vset = s; };
+        void setVset(set<string>& s) { vset = s; };
         void addFuncsig(funcsig& f) { funcsigs.push_back(f); };
         void addVarsig(varsig& v) { varsigs.push_back(v); };
-        void addOp(opsig& o) { opsigs.push_back(o); };
+        void addOpsig(opsig& o) { opsigs.push_back(o); };
+        bool hasType(string i) { return typenames.find(i) != typenames.end(); };
 };
 
 class stype : public type {
-    private:
-        set values = set();
     public:
-        stype(string& i, set& vs) {
+        stype(string& i, unique_ptr<polarset> vs) {
             this->setIdent(i);
-            values = vs;
+            this->setVset(vs);
+            this->setType(i);
         }
 };
 
@@ -168,101 +174,18 @@ class piterator : public pcontainer {
             varsig index = varsig(this->getType("int"), "i");
             vector<varsig> operands = {index};
             opsig sqrbraget = opsig(operands, "[]", ACCESS::PUBLIC, make_shared<type>(t));
-            this->addOp(sqrbraget);
-        }
+            this->addOpsig(sqrbraget);
+        };
         piterator() { /* untyped iterator constructor (set) */
-            funcsig next = funcsig("next", ACCESS::PUBLIC, make_shared<type>(this->getType("type")));
+            funcsig next = funcsig("next", ACCESS::PUBLIC, this->getType("type"));
             this->addFuncsig(next);
-            funcsig get = funcsig("get", ACCESS::PUBLIC, make_shared<type>(this->getType("type")));
+            funcsig get = funcsig("get", ACCESS::PUBLIC, this->getType("type"));
             this->addFuncsig(get);
 
             varsig index = varsig(this->getType("int"), "i");
             vector<varsig> operands = {index};
-            opsig sqrbraget = opsig(operands, "[]", ACCESS::PUBLIC, make_shared<type>(this->getType("type")));
-            this->addOp(sqrbraget);
-        }
-
-};
-
-
-/*
-** set methods:
-** union
-** intersection
-** difference
-** cartesian product
-** in
-** within
-*/
-class set : public piterator {
-    public:
-        set() {
-            /* union */
-            varsig set2_union = varsig(make_shared<type>(*this), "s");
-            vector<varsig> unionparams = {set2_union};
-            funcsig union_func = funcsig(unionparams, "union", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addFuncsig(union_func);
-
-            varsig set2_union_op = varsig(make_shared<type>(*this), "s");
-            vector<varsig> unionoperands = {set2_union_op};
-            opsig union_op = opsig(unionoperands, "\\/", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addOp(union_op);
-
-            /* intersection */
-            varsig set2_intersection = varsig(make_shared<type>(*this), "s");
-            vector<varsig> intersectionparams = {set2_intersection};
-            funcsig intersection_func = funcsig(intersectionparams, "intersection", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addFuncsig(intersection_func);
-
-            varsig set2_intersection_op = varsig(make_shared<type>(*this), "s");
-            vector<varsig> intersectionoperands = {set2_intersection_op};
-            opsig intersection_op = opsig(intersectionoperands, "/\\", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addOp(intersection_op);
-
-            /* difference */
-            varsig set2_difference = varsig(make_shared<type>(*this), "s");
-            vector<varsig> differenceparams = {set2_difference};
-            funcsig difference_func = funcsig(differenceparams, "difference", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addFuncsig(difference_func);
-
-            varsig set2_difference_op = varsig(make_shared<type>(*this), "s");
-            vector<varsig> differenceoperands = {set2_difference_op};
-            opsig difference_op = opsig(differenceoperands, "-", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addOp(difference_op);
-
-            /* cartesian product */
-            varsig set2_product = varsig(make_shared<type>(*this), "s");
-            vector<varsig> productparams = {set2_product};
-            funcsig product_func = funcsig(productparams, "product", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addFuncsig(product_func);
-
-            varsig set2_product_op = varsig(make_shared<type>(*this), "s");
-            vector<varsig> productoperands = {set2_product_op};
-            opsig product_op = opsig(productoperands, "*", ACCESS::PUBLIC, make_shared<type>(*this));
-            this->addOp(product_op);
-
-            /* in */
-            varsig elem = varsig(make_shared<type>(this->getType("type")), "e");
-            vector<varsig> inparams = {elem};
-            funcsig in_func = funcsig(inparams, "in", ACCESS::PUBLIC, make_shared<type>(this->getType("bool")));
-            this->addFuncsig(in_func);
-
-            varsig elem_op = varsig(make_shared<type>(this->getType("type")), "e");
-            vector<varsig> inoperands = {elem_op};
-            opsig in_op = opsig(inoperands, "in", ACCESS::PUBLIC, make_shared<type>(this->getType("bool")));
-            this->addOp(in_op);
-
-            /* within */
-            varsig set2_within = varsig(make_shared<type>(*this), "s");
-            vector<varsig> withinparams = {set2_within};
-            funcsig within_func = funcsig(withinparams, "within", ACCESS::PUBLIC, make_shared<type>(this->getType("bool")));
-            this->addFuncsig(within_func);
-
-            varsig set2_within_op = varsig(make_shared<type>(*this), "s");
-            vector<varsig> withinoperands = {set2_within_op};
-            opsig within_op = opsig(withinoperands, "within", ACCESS::PUBLIC, make_shared<type>(this->getType("bool")));
-            this->addOp(within_op);
-
+            opsig sqrbraget = opsig(operands, "[]", ACCESS::PUBLIC, this->getType("type"));
+            this->addOpsig(sqrbraget);
         };
 };
 
@@ -283,6 +206,87 @@ class op {
         };
 };
 
+/*
+** set methods:
+** union
+** intersection
+** difference
+** cartesian product
+** in
+** within
+*/
+class pset : public piterator {
+    public:
+        pset() {
+            /* union */
+            varsig set2_union = varsig(make_shared<type>(*this), "s");
+            vector<varsig> unionparams = {set2_union};
+            funcsig union_func = funcsig(unionparams, "union", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addFuncsig(union_func);
+
+            varsig set2_union_op = varsig(make_shared<type>(*this), "s");
+            vector<varsig> unionoperands = {set2_union_op};
+            opsig union_op = opsig(unionoperands, "\\/", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addOpsig(union_op);
+
+            /* intersection */
+            varsig set2_intersection = varsig(make_shared<type>(*this), "s");
+            vector<varsig> intersectionparams = {set2_intersection};
+            funcsig intersection_func = funcsig(intersectionparams, "intersection", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addFuncsig(intersection_func);
+
+            varsig set2_intersection_op = varsig(make_shared<type>(*this), "s");
+            vector<varsig> intersectionoperands = {set2_intersection_op};
+            opsig intersection_op = opsig(intersectionoperands, "/\\", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addOpsig(intersection_op);
+
+            /* difference */
+            varsig set2_difference = varsig(make_shared<type>(*this), "s");
+            vector<varsig> differenceparams = {set2_difference};
+            funcsig difference_func = funcsig(differenceparams, "difference", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addFuncsig(difference_func);
+
+            varsig set2_difference_op = varsig(make_shared<type>(*this), "s");
+            vector<varsig> differenceoperands = {set2_difference_op};
+            opsig difference_op = opsig(differenceoperands, "-", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addOpsig(difference_op);
+
+            /* cartesian product */
+            varsig set2_product = varsig(make_shared<type>(*this), "s");
+            vector<varsig> productparams = {set2_product};
+            funcsig product_func = funcsig(productparams, "product", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addFuncsig(product_func);
+
+            varsig set2_product_op = varsig(make_shared<type>(*this), "s");
+            vector<varsig> productoperands = {set2_product_op};
+            opsig product_op = opsig(productoperands, "*", ACCESS::PUBLIC, make_shared<type>(*this));
+            this->addOpsig(product_op);
+
+            /* in */
+            varsig elem = varsig(this->getType("type"), "e");
+            vector<varsig> inparams = {elem};
+            funcsig in_func = funcsig(inparams, "in", ACCESS::PUBLIC, this->getType("bool"));
+            this->addFuncsig(in_func);
+
+            varsig elem_op = varsig(this->getType("type"), "e");
+            vector<varsig> inoperands = {elem_op};
+            opsig in_op = opsig(inoperands, "in", ACCESS::PUBLIC, this->getType("bool"));
+            this->addOpsig(in_op);
+
+            /* within */
+            varsig set2_within = varsig(make_shared<type>(*this), "s");
+            vector<varsig> withinparams = {set2_within};
+            funcsig within_func = funcsig(withinparams, "within", ACCESS::PUBLIC, this->getType("bool"));
+            this->addFuncsig(within_func);
+
+            varsig set2_within_op = varsig(make_shared<type>(*this), "s");
+            vector<varsig> withinoperands = {set2_within_op};
+            opsig within_op = opsig(withinoperands, "within", ACCESS::PUBLIC, this->getType("bool"));
+            this->addOpsig(within_op);
+
+        };
+};
+
 
 class astnode {
     private:
@@ -299,12 +303,12 @@ class astnode {
 
 class program : public astnode {
     private:
-        unique_ptr<vector<def>> defs = {};
+        unique_ptr<vector<unique_ptr<def>>> defs = {};
     public:
         program() {
             this->setType(AST_TYPE::PROGRAM);
         }
-        program(unique_ptr<vector<def>>& d) {
+        program(unique_ptr<vector<unique_ptr<def>>>& d) {
             this->setType(AST_TYPE::PROGRAM);
             defs = move(d);
         };
@@ -317,14 +321,16 @@ class def : public program {
         };
 };
 
-class function : public def {
+class functionast : public def {
     private:
+        shared_ptr<type> functype;
         string ident = "";
         unique_ptr<params> fparams;
         unique_ptr<block> fblock;
     public:
-        function(string& i, unique_ptr<params>& p, unique_ptr<block>& b) {
+        functionast(shared_ptr<type> t, string i, unique_ptr<params>& p, unique_ptr<block>& b) {
             this->setType(AST_TYPE::FUNCTION);
+            functype = t;
             ident = move(i);
             fparams = move(p);
             fblock = move(b);
@@ -356,13 +362,22 @@ class variable : public def {
 class tdef : public def {
     private:
         string ident = "";
-        type type;
+        shared_ptr<type> newtype;
     public:
-        tdef(string& i, set vs) {
-            this->setType(AST_TYPE::TDEF);
-            type = stype(i, vs);
-        };
         tdef() {};
+        void setIdent(string i) { ident = i; };
+        void setNewType(shared_ptr<type> t) { newtype = t; };
+        string getIdent() { return ident; };
+        shared_ptr<type> getNewType() { return newtype; };
+};
+
+class simpletdef : public tdef {
+    public:
+        simpletdef(string i, unique_ptr<polarset> s) {
+            type simple = stype(i, p);
+            this->setIdent(i);
+            this->setNewType(simple.getType(i));
+        };
 };
 
 class block : public program {

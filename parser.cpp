@@ -41,12 +41,34 @@ bool parsedMain = false;
 class PolarParseException : public exception {
     private:
         string expected = "";
+        string exceptionname = "";
     public:
-        PolarParseException(const char* e) : expected("'" + string(e) + "'") {};
-        PolarParseException(string e) : expected("'" + e + "'") {};
-        const char* what() const throw() {
-            string eString = "PolarParseException: Got '" + curTok.lexeme + "', expected " + expected;
+        PolarParseException() {};
+        PolarParseException(const char* e) { this->setExpected(e); };
+        PolarParseException(string e) { this->setExpected(e); };
+        const char* what() throw() {
+            string eString = this->exceptionName() + ": Got '" + curTok.lexeme + "', expected " + this->getExpected();
             eString +=  " at " + to_string(curTok.lineNo) + ":" + to_string(curTok.columnNo);
+            return eString.c_str();
+        };
+        void setExpected(const char* e) { expected = "'" + string(e) + "'"; };
+        void setExpected(string e) { expected = "'" + e + "'"; };
+        string getExpected() { return expected; };
+        string exceptionName() { return exceptionname; };
+};
+
+class PolarUndefinedTypeException : public PolarParseException {
+    private:
+        string typeident = "";
+        string exceptionname = "PolarUndefinedTypeException";
+    public:
+        PolarUndefinedTypeException(const char* e) { this->setTypeIdent(e); };
+        PolarUndefinedTypeException(string e) { this->setTypeIdent(e); };
+        void setTypeIdent(string& i) { typeident = i; };
+        void setTypeIdent(const char* e) { typeident = string(e); };
+        string getTypeIdent() { return typeident; };
+        const char* what() throw() {
+            string eString = this->exceptionName() + ": Type '" + this->getTypeIdent() + "' is undefined.";
             return eString.c_str();
         };
 };
@@ -429,17 +451,115 @@ static TOKEN getNextToken() {
     tok_buffer.pop_front();
 
     return curTok = temp;
-}
+};
 
 
 /* parser: adds context to the program */
+type basetype = type("type");
 
 
+unique_ptr<tdef> tdef_parse() {
+    if (curTok.type != TOKEN_TYPE::TYPE)
+        throw PolarParseException("type");
+    getNextToken();
 
+    if (curTok.type != TOKEN_TYPE::IDENT)
+        throw PolarParseException("ident");
+    string tdefident = curTok.lexeme;
+    getNextToken();
+
+    switch(curTok.type) {
+        case TOKEN_TYPE::ASSIGN: {
+            /* simple type */
+            getNextToken();
+            unique_ptr<polarset> vset = set_parse();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            return make_unique<type>(new simpletdef(tdefident, vset));
+        };
+        case TOKEN_TYPE::LBRA: {
+            /* complex type without inheritance */
+            getNextToken();
+
+        }
+    };
+};
+
+shared_ptr<type> type_parse() {
+    /*
+    ** Token is definition type at this point
+    ** Need to make sure token is not reserved syntax
+    ** Need to search types to check if is a known type
+    */
+    if (curTok.type != TOKEN_TYPE::IDENT)
+        throw PolarParseException("ident");
+
+    if (!basetype.hasType(curTok.lexeme))
+        throw PolarUndefinedTypeException(curTok.lexeme);
+
+    shared_ptr<type> type = basetype.getType(curTok.lexeme);
+    getNextToken();
+    return type;
+};
+
+unique_ptr<def> global() {
+
+    switch(curTok.type) {
+        case TOKEN_TYPE::TYPE: {
+            return tdef_parse();
+        };
+        default: {
+            shared_ptr<type> globaltype = type_parse();
+
+            if (curTok.type != TOKEN_TYPE::IDENT)
+                throw PolarParseException("ident");
+            string globalident = curTok.lexeme;
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::LPAR)
+                throw PolarParseException("(");
+            getNextToken();
+
+            unique_ptr<params> globalparams = params_parse();
+
+            if (curTok.type != TOKEN_TYPE::RPAR)
+                throw PolarParseException(")");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::LBRA)
+                throw PolarParseException("{");
+            getNextToken();
+
+            unique_ptr<block> globalblock = block_parse();
+
+            if (curTok.type != TOKEN_TYPE::RBRA)
+                throw PolarParseException("}");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            return make_unique<def>(new functionast(globaltype, globalident, globalparams, globalblock));
+        };
+    };
+};
+
+unique_ptr<vector<unique_ptr<def>>> global_list() {
+    vector<unique_ptr<def>> globals = {};
+    while (curTok.type != TOKEN_TYPE::E_O_F) {
+        unique_ptr<def> g = global();
+        globals.push_back(move(g));
+    };
+    return make_unique<vector<unique_ptr<def>>>(globals);
+};
 
 unique_ptr<program> parser() {
-
-}
+    unique_ptr<vector<unique_ptr<def>>> globals = global_list();
+    unique_ptr<program> prog = make_unique<program>(new program(globals));
+    return prog;
+};
 
 
 int main(int argc, char **argv) {
@@ -447,21 +567,29 @@ int main(int argc, char **argv) {
     int lineNo = 1;
     int columnNo = 1;
     string filename = string(argv[1]);
+    string process = string(argv[2]);
     pFile = fopen(filename.c_str(), "r");
     if (pFile == NULL) {
         cout << "Null file";
         return 1;
-    }
+    };
 
-    cout << "Lexing " << filename << "\n";
-
-
-    do {
-        getNextToken();
-        cout << "Token: " << curTok.lexeme << "\n";
-    } while (curTok.type != TOKEN_TYPE::E_O_F);
-
-}
+    if (process == "-lex") {
+        cout << "Lexing " << filename << "\n";
+        do {
+            getNextToken();
+            cout << "Token: " << curTok.lexeme << "\n";
+        } while (curTok.type != TOKEN_TYPE::E_O_F);
+        return 0;
+    } else if (process == "-parse") {
+        cout << "Parsing " << filename << "\n";
+        // unique_ptr<program> prog = parser();
+        return 0;
+    } else {
+        cout << "Unknown process mode...\n";
+        return 1;
+    };
+};
 
 
 /*
@@ -473,7 +601,6 @@ int main(int argc, char **argv) {
 **              | e
 **
 ** Global -> Type ident ( Params ) { Block } ;
-**         | Expr ;
 **         | Typedef
 **
 ** Type -> <types>
@@ -481,6 +608,21 @@ int main(int argc, char **argv) {
 ** Typedef -> type ident = Set ;
 **          | type ident { Complextype } ;
 **          | type ident : ident { Complextype } ;
+**
+** Complextype -> AccessMembers Complextype
+**              | e
+**
+** AccessMembers -> Access { Def_list } ;
+**
+** Access -> public
+**         | private
+** 
+** Def_list -> Def Def_list
+**           | e
+** 
+** Def -> Type ident = Expr ;
+**      | Type ident ( Params ) { Block } ;
+**      | ident ( Params ) { Block } ;
 **
 ** Params -> Param_list
 **         | e

@@ -58,6 +58,7 @@ enum class TOKEN_TYPE {
     LBRA,
     RBRA,
     STRING_LIT,
+    TYPE,
     E_O_F,
     UNKNOWN
 };
@@ -174,6 +175,8 @@ std::string tokToLex(TOKEN_TYPE t) {
             return "]";
         case TOKEN_TYPE::STRING_LIT:
             return "string_lit";
+        case TOKEN_TYPE::TYPE:
+            return "type";
         case TOKEN_TYPE::E_O_F:
             return "EOF";
         case TOKEN_TYPE::UNKNOWN:

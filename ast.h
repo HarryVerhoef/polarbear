@@ -35,9 +35,14 @@ class string_lit;
 class char_lit;
 
 class iterator;
-class set;
+class pset;
 class array;
 
+
+class sig;
+class varsig;
+class funcsig;
+class opsig;
 
 enum class AST_TYPE {
     ASTNODE,
@@ -65,10 +70,7 @@ enum class AST_TYPE {
     INT_LIT,
     REAL_LIT,
     STRING_LIT,
-    CHAR_LIT,
-    ITERATOR,
-    SET,
-    ARRAY
+    CHAR_LIT
 };
 
 enum class ACCESS {
