@@ -458,6 +458,119 @@ static TOKEN getNextToken() {
 type basetype = type("type");
 
 
+unique_ptr<def> def_parse() {
+    if (curTok.type != TOKEN_TYPE::IDENT)
+        throw PolarParseException("ident");
+    string typeident = curTok.lexeme;
+    getNextToken();
+
+    if (basetype.hasType(i)) {
+        /* Non-constructor */
+        shared_ptr<type> membertype = basetype.getType(typeident);
+
+        if (curTok.type != TOKEN_TYPE::IDENT)
+            throw PolarParseException("ident");
+        string memberident = curTok.lexeme;
+        getNextToken();
+
+        switch (curTok.type) {
+            case TOKEN_TYPE::ASSIGN: {
+                getNextToken();
+                
+                unique_ptr<expr> memberexpr = expr_parse();
+
+                if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                    throw PolarParseException(";");
+                getNextToken();
+
+                return make_unique<def>(new tmembervar(memberident, membertype, memberexpr));
+
+            };
+            case TOKEN_TYPE::LPAR: {
+                getNextToken();
+
+                unique_ptr<params> memberparams = params_parse();
+
+                if (curTok.type != TOKEN_TYPE::RPAR)
+                    throw PolarParseException(")");
+                getNextToken();
+
+                if (curTok.type != TOKEN_TYPE::LBRA)
+                    throw PolarParseException("{");
+                getNextToken();
+
+                unique_ptr<block> memberblock = block_parse();
+
+                if (curTok.type != TOKEN_TYPE::RBRA)
+                    throw PolarParseException("}");
+                getNextToken();
+
+                if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                    throw PolarParseException(";");
+                getNextToken();
+
+                return make_unique<def>(new tmemberfunc(memberident, membertype, memberparams, memberblock));
+            };
+            default: {
+
+            };
+        };
+
+    } else {
+        /* Constructor */
+    };
+};
+
+unique_ptr<vector<unique_ptr<tmember>>> complex_def_list() {
+    vector<unique_ptr<def>> defs = {};
+    while (curTok.type != TOKEN_TYPE::RBRA) {
+        unique_ptr<def> d = def_parse();
+        defs.push_back(move(d));
+    };
+    return make_unique<vector<unique_ptr<def>>>(defs);
+};
+
+ACCESS access() {
+    switch(curTok.type) {
+        case TOKEN_TYPE::PUBLIC: {
+            getNextToken();
+            return ACCESS::PUBLIC;
+        };
+        case TOKEN_TYPE::PRIVATE: {
+            getNextToken();
+            return ACCESS::PRIVATE;
+        };
+        default: {
+            throw PolarParseException("public' or 'private");
+        };
+    };
+};
+
+unique_ptr<vector<unique_ptr<complexblock>>> complex_type() {
+    vector<unique_ptr<complexblock>> v = {};
+    while (curTok.type != TOKEN_TYPE::RBRA) {
+        ACCESS a = access();
+
+        if (curTok.type != TOKEN_TYPE::LBRA)
+            throw PolarParseException("{");
+        getNextToken();
+
+        unique_ptr<vector<unique_ptr<tmember>>> defs = complex_def_list();
+
+        if (curTok.type != TOKEN_TYPE::RBRA)
+            throw PolarParseException("}");
+        getNextToken();
+
+        if (curTok.type != TOKEN_TYPE::SEMICOLON)
+            throw PolarParseException(";");
+        getNextToken();
+    };
+    return make_unique<vector<unique_ptr<complexblock>>>(v);
+};
+
+
+
+
 unique_ptr<tdef> tdef_parse() {
     if (curTok.type != TOKEN_TYPE::TYPE)
         throw PolarParseException("type");

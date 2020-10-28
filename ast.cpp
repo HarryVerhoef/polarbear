@@ -209,6 +209,19 @@ class op {
         };
 };
 
+class domain {
+    /*
+    ** for a in A for b in B
+    **
+    */
+    private:
+        unique_ptr<vector<pair<string,string>>> dom;
+    public:
+        domain(unique_ptr<vector<pair<string,string>>>& d) {
+            dom = move(d);
+        };
+};
+
 class polarset {
     /*
     ** polarset is a baseclass for the different types of set representations in polarbear.
@@ -230,24 +243,38 @@ class polarset {
     ** Checking membershup for abstract sets is O(f(x)) where f(x) = time complexity of the constraints.
     ** iterating through any abstract set will always be an infinite process, since the next method on an abstract set will constantly pseudo-randomly select from domain and check if it satisfies constraint until it does, at which point it returns this element from next 
     */
+    public:
+        polarset() {};
 };
 
-class finitepolarset : public polarset {
+class nonabstractpolarset : public polarset {
     /*
-    ** finitepolarset represents an finite set that cannot be reduced.
+    ** Nonabstract set:
+    ** {a,b,c}
     */
+    private:
+        unique_ptr<unordered_set<expr>> elems;
+    public:
+        nonabstractpolarset(unique_ptr<unordered_set<expr>>& s) {
+            elems = move(s);
+        };
 };
 
-class infinitepolarset : public polarset {
+class abstractpolarset : public polarset {
     /*
-    ** infinitepolarset represents a polarset that has infinite elements.
-    ** This is a polarset of syntactic form 2 where the domain is infinite and the conditions are non-restricting
-    */ 
-
-};
-
-class irreduciblepolarset : public polarset {
-
+    ** Abstract set:
+    ** {<expr> : <domain> : <expr<bool>>}
+    */
+    private:
+        unique_ptr<expr> production;
+        unique_ptr<domain> domain;
+        unique_ptr<expr> condition;
+    public:
+        abstractpolarset(unique_ptr<expr>& p, unique_ptr<domain>& d, unique_ptr<expr>& c) {
+            production = move(p);
+            domain = move(d);
+            condition = move(c);
+        };
 };
 
 /*
@@ -406,9 +433,10 @@ class variable : public def {
 class complexblock : public def {
     private:
         ACCESS access = ACCESS::PRIVATE;
-        unique_ptr<vector<unique_ptr<def>>> defs = {};
+        unique_ptr<vector<unique_ptr<tmember>>> members = {};
+        unique_ptr<vector<unique_ptr<tconstructor>>> constructors = {};
     public:
-        complexblock(ACCESS a, unique_ptr<vector<unique_ptr<def>>>& d) {
+        complexblock(ACCESS a, unique_ptr<vector<unique_ptr<tmember>>>& d) {
             access = a;
             defs = move(d);
         };
@@ -443,6 +471,56 @@ class complextdef : public tdef {
             this->setNewType(complex.getType(i));
         };
 };
+
+class tconstructor : def {
+    private:
+        unique_ptr<params> constructorparams;
+        unique_ptr<block> constructorblock;
+    public:
+        tconstructor(unique_ptr<params>& p, unique_ptr<block>& b) {
+            constructorparams = move(p);
+            constructorblock = move(b);
+        };
+};
+
+class tmember : def {
+    private:
+        string memberident = "";
+        shared_ptr<type> membertype;
+    public:
+        tmember() {};
+        string getIdent() { return memberident; };
+        shared_ptr<type> getType() { return membertype; };
+        void setIdent(string& i) { memberident = i; };
+        void setType(shared_ptr<type> t) { membertype = t; };
+};
+
+class tmembervar : tmember {
+    private:
+        unique_ptr<expr> memberexpr;
+    public:
+        tmembervar() {};
+        tmembervar(string i, shared_ptr<type> t, unique_ptr<expr>& e) {
+            this->setIdent(i);
+            this->setType(t);
+            memberexpr = move(e);
+        };
+};
+
+class tmemberfunc : tmember {
+    private:
+        unique_ptr<params> memberparams;
+        unique_ptr<block> memberblock;
+    public:
+        tmemberfunc() {};
+        tmemberfunc(string i, shared_ptr<type> t, unique_ptr<params>& p, unique_ptr<block>& b) {
+            this->setIdent(i);
+            this->setType(t);
+            memberparams = move(p);
+            memberblock = move(b);
+        };
+};
+
 
 class block : public program {
     private:
