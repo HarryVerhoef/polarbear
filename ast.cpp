@@ -52,7 +52,8 @@ class ctype : public type {
             this->setType(i);
             /*
             ** iterate through complexes adding var and func sigs
-            ** if come to a constructor then use to construct vset along with varsigs?
+            ** determine vset on vsigs
+            ** {bear() : : bear.a in A /\ bear.b in B}
             */
         };
 };
@@ -206,6 +207,47 @@ class op {
         op(TOKEN_TYPE t) {
             default_op = t;
         };
+};
+
+class polarset {
+    /*
+    ** polarset is a baseclass for the different types of set representations in polarbear.
+    ** polarset is not affiliated with the type system.
+    ** Syntactic set formats:
+    ** (1) {a,b,c}
+    ** (2) {<expr> : <domain> : <expr<bool>>}
+    ** Type 1 cannot be infinite, but type 2 can be either infinite or finite depending entirely on the finiteness of the domain.
+    **
+    ** Semantically, there are 3 types of polar set
+    ** (1) Nonabstract finite set:
+    **       Iff the set is of syntactic form 1.
+    ** (2) Abstract finite set:
+    **       A finite set of syntactic form 2.
+    ** (3) Abstract infinite set:
+    **       An infinite set of syntactic form 2: A set whose domain must be infinite and whose constraints turn the domain finite.
+    **
+    ** Checking membership for type 1 semantic sets is O(1).
+    ** Checking membershup for abstract sets is O(f(x)) where f(x) = time complexity of the constraints.
+    ** iterating through any abstract set will always be an infinite process, since the next method on an abstract set will constantly pseudo-randomly select from domain and check if it satisfies constraint until it does, at which point it returns this element from next 
+    */
+};
+
+class finitepolarset : public polarset {
+    /*
+    ** finitepolarset represents an finite set that cannot be reduced.
+    */
+};
+
+class infinitepolarset : public polarset {
+    /*
+    ** infinitepolarset represents a polarset that has infinite elements.
+    ** This is a polarset of syntactic form 2 where the domain is infinite and the conditions are non-restricting
+    */ 
+
+};
+
+class irreduciblepolarset : public polarset {
+
 };
 
 /*
