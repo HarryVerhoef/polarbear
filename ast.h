@@ -1,5 +1,5 @@
-#ifndef AST
-#define AST
+#ifndef AST_H
+#define AST_H
 
 class astnode;
 
@@ -34,15 +34,7 @@ class real_lit;
 class string_lit;
 class char_lit;
 
-class iterator;
-class pset;
-class array;
 
-
-class sig;
-class varsig;
-class funcsig;
-class opsig;
 
 enum class AST_TYPE {
     ASTNODE,
@@ -71,11 +63,6 @@ enum class AST_TYPE {
     REAL_LIT,
     STRING_LIT,
     CHAR_LIT
-};
-
-enum class ACCESS {
-    PUBLIC,
-    PRIVATE
 };
 
 
