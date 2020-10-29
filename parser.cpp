@@ -457,7 +457,62 @@ static TOKEN getNextToken() {
 /* parser: adds context to the program */
 type basetype = type("type");
 
- 
+
+/*
+** Block -> IfStmt Block
+**        | ForStmt Block
+**        | WhileStmt Block
+**        | Expr Block
+**        | e
+*/
+unique_ptr<block> block_parse() {
+    vector<unique_ptr<stmt>> stmts = {};
+    while (curTok.type != TOKEN_TYPE::RBRA) {
+        switch(curTok.type) {
+            case TOKEN_TYPE::IF: {
+                unique_ptr<ifstmt> ifstatement = ifstmt_parse();
+                stmts.push_back(move(ifstatement));
+            };
+            case TOKEN_TYPE::FOR: {
+                unique_ptr<forstmt> forstatement = forstmt_parse();
+                stmts.push_back(move(forstatement));
+            };
+            case TOKEN_TYPE::WHILE: {
+                unique_ptr<whilestmt> whilestatement = whilestmt_parse();
+                stmts.push_back(move(whilestatement));
+            };
+            default: {
+                unique_ptr<expr> exprstatement = expr_parse();
+                stmts.push_back(move(exprstatement));
+            };
+        };
+    };
+    return make_unique<block>(new block(stmts));
+};
+
+unique_ptr<params> params_parse() {
+    vector<variable> variables = {};
+    while (curTok.type != TOKEN_TYPE::RPAR) {
+        if (curTok.type != TOKEN_TYPE::IDENT)
+            throw PolarParseException("ident");
+        shared_ptr<type> vartype = basetype.getType(curTok.lexeme);
+        getNextToken();
+
+        if (curTok.type != TOKEN_TYPE::IDENT)
+            throw PolarParseException("ident");
+        string varident = curTok.lexeme;
+
+        if (curTok.type == TOKEN_TYPE::COMMA)
+            getNextToken();
+        
+        variable var = variable(vartype, varident);
+        variables.push_back(var);
+    };
+
+    unique_ptr<vector<variable>> vars = make_unique<vector<variable>>(variables);
+
+    return make_unique<params>(new params(vars));
+};
 
 unique_ptr<def> def_parse() {
     if (curTok.type != TOKEN_TYPE::IDENT)

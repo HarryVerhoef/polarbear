@@ -59,9 +59,9 @@ class functionast : public def {
 
 class params : public program {
     private:
-        unique_ptr<vector<unique_ptr<variable>>> ps = {};
+        unique_ptr<vector<variable>> ps = {};
     public:
-        params(unique_ptr<vector<unique_ptr<variable>>>& p) {
+        params(unique_ptr<vector<variable>>& p) {
             this->setType(AST_TYPE::PARAMS);
             ps = move(p);
         };
@@ -69,10 +69,10 @@ class params : public program {
 
 class variable : public def {
     private:
-        unique_ptr<type> vtype;
+        shared_ptr<type> vtype;
         string ident = "";
     public:
-        variable(unique_ptr<type>& t, string& i) {
+        variable(shared_ptr<type>& t, string& i) {
             this->setType(AST_TYPE::VARIABLE);
             vtype = move(t);
             ident = i;
@@ -181,9 +181,9 @@ class tmemberfunc : tmember {
 
 class block : public program {
     private:
-        unique_ptr<vector<stmt>> stmts = {};
+        vector<unique_ptr<stmt>> stmts = {};
     public:
-        block(unique_ptr<vector<stmt>>& ss) {
+        block(vector<unique_ptr<stmt>>& ss) {
             this->setType(AST_TYPE::BLOCK);
             stmts = move(ss);
         };
