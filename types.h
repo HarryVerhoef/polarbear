@@ -5,6 +5,9 @@ class iterator;
 class pset;
 class array;
 
+class type;
+class simpletype;
+class complextype;
 
 class sig;
 class varsig;

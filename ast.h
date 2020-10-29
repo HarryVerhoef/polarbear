@@ -9,9 +9,6 @@ class def;
 class function;
 class params;
 class variable;
-class type;
-class stype;
-class ctype;
 
 class block;
 class stmt;

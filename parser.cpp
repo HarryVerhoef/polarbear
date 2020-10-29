@@ -457,6 +457,7 @@ static TOKEN getNextToken() {
 /* parser: adds context to the program */
 type basetype = type("type");
 
+ 
 
 unique_ptr<def> def_parse() {
     if (curTok.type != TOKEN_TYPE::IDENT)
@@ -512,16 +513,40 @@ unique_ptr<def> def_parse() {
                 return make_unique<def>(new tmemberfunc(memberident, membertype, memberparams, memberblock));
             };
             default: {
-
+                throw PolarParseException("=' or '(");
             };
         };
-
     } else {
         /* Constructor */
+        if (curTok.type != TOKEN_TYPE::LPAR)
+            throw PolarParseException("(");
+        getNextToken();
+
+        unique_ptr<params> constructorparams = params_parse();
+
+        if (curTok.type != TOKEN_TYPE::RPAR)
+            throw PolarParseException(")");
+        getNextToken();
+
+        if (curTok.type != TOKEN_TYPE::LBRA)
+            throw PolarParseException("{");
+        getNextToken();
+
+        unique_ptr<block> constructorblock = block_parse();
+
+        if (curTok.type != TOKEN_TYPE::RBRA)
+            throw PolarParseException("}");
+        getNextToken();
+
+        if (curTok.type != TOKEN_TYPE::SEMICOLON)
+            throw PolarParseException(";");
+        getNextToken();
+
+        return make_unique<def>(new tconstructor(constructorparams, constructorblock));
     };
 };
 
-unique_ptr<vector<unique_ptr<tmember>>> complex_def_list() {
+unique_ptr<vector<unique_ptr<def>>> complex_def_list() {
     vector<unique_ptr<def>> defs = {};
     while (curTok.type != TOKEN_TYPE::RBRA) {
         unique_ptr<def> d = def_parse();
@@ -555,7 +580,7 @@ unique_ptr<vector<unique_ptr<complexblock>>> complex_type() {
             throw PolarParseException("{");
         getNextToken();
 
-        unique_ptr<vector<unique_ptr<tmember>>> defs = complex_def_list();
+        unique_ptr<vector<unique_ptr<def>>> defs = complex_def_list();
 
         if (curTok.type != TOKEN_TYPE::RBRA)
             throw PolarParseException("}");
@@ -567,9 +592,6 @@ unique_ptr<vector<unique_ptr<complexblock>>> complex_type() {
     };
     return make_unique<vector<unique_ptr<complexblock>>>(v);
 };
-
-
-
 
 unique_ptr<tdef> tdef_parse() {
     if (curTok.type != TOKEN_TYPE::TYPE)
@@ -585,7 +607,7 @@ unique_ptr<tdef> tdef_parse() {
         case TOKEN_TYPE::ASSIGN: {
             /* simple type */
             getNextToken();
-            unique_ptr<polarset> vset = set_parse();
+            shared_ptr<polarset> vset = set_parse();
 
             if (curTok.type != TOKEN_TYPE::SEMICOLON)
                 throw PolarParseException(";");
@@ -605,8 +627,35 @@ unique_ptr<tdef> tdef_parse() {
                 throw PolarParseException(";");
             getNextToken();
 
-            return make_unique<tdef>(new complextdef(tdefident, cblock));
+            return make_unique<tdef>(new complextdef(tdefident, cblocks));
         };
+        case TOKEN_TYPE::COLON: {
+            /* complex type with inheritance */
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::IDENT)
+                throw PolarParseException("ident");
+            string supertypeident = curTok.lexeme;
+            shared_ptr<type> supertype = basetype.getType(supertypeident);
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::LBRA)
+                throw PolarParseException("{");
+            getNextToken();
+
+            unique_ptr<vector<unique_ptr<complexblock>>> cblocks = complex_type();
+
+            if (curTok.type != TOKEN_TYPE::RBRA)
+                throw PolarParseException("}");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            return make_unique<tdef>(new complextdef(tdefident, supertype, cblocks))
+
+        }
     };
 };
 

@@ -6,6 +6,7 @@
 #include "types.h"
 #include "types.cpp"
 
+using namespace std;
 
 class astnode {
     private:
@@ -104,17 +105,25 @@ class tdef : public def {
 
 class simpletdef : public tdef {
     public:
-        simpletdef(string i, unique_ptr<polarset>& s) {
-            type simple = stype(i, move(p));
+        simpletdef(string i, shared_ptr<polarset>& s) {
+            type simple = simpletype(i, s);
             this->setIdent(i);
             this->setNewType(simple.getType(i));
         };
 };
 
 class complextdef : public tdef {
+    private:
+        shared_ptr<type> supertype;
     public:
         complextdef(string i, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
-            type complex = ctype(i, move(cs));
+            type complex = complextype(i, cs);
+            this->setIdent(i);
+            this->setNewType(complex.getType(i));
+        };
+        complextdef(string i, shared_ptr<type> s, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
+            type complex = complextype(i, s, cs);
+            supertype = s;
             this->setIdent(i);
             this->setNewType(complex.getType(i));
         };

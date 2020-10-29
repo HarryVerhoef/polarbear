@@ -7,6 +7,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "builtin.cpp"
+
 using namespace std;
 
 class type {
@@ -15,7 +16,7 @@ class type {
         static unordered_set<string> typenames;
         string ident = "";
         int length = 0;
-        set<string> vset = {};
+        shared_ptr<polarset> vset;
         vector<funcsig> funcsigs = {};
         vector<varsig> varsigs = {};
         vector<opsig> opsigs = {};
@@ -28,32 +29,42 @@ class type {
             typenames.insert(i);
         };
         shared_ptr<type> getType(string s) { return typemap[s]; };
-        set<string> getVset() { return vset; };
+        shared_ptr<polarset> getVset() { return vset; };
         string getIdent() { return ident; };
         void setIdent(string& i) { ident = i; };
-        void setVset(set<string>& s) { vset = s; };
+        void setVset(shared_ptr<polarset> s) { vset = s; };
         void addFuncsig(funcsig& f) { funcsigs.push_back(f); };
         void addVarsig(varsig& v) { varsigs.push_back(v); };
         void addOpsig(opsig& o) { opsigs.push_back(o); };
         bool hasType(string i) { return typenames.find(i) != typenames.end(); };
 };
 
-class stype : public type {
+class simpletype : public type {
     public:
-        stype(string& i, unique_ptr<polarset> vs) {
+        simpletype(string& i, shared_ptr<polarset>& vs) {
             this->setIdent(i);
             this->setVset(vs);
             this->setType(i);
         }
 };
 
-class ctype : public type {
+class complextype : public type {
     private:
-        type supertype;
+        shared_ptr<type> supertype;
         unique_ptr<vector<unique_ptr<complexblock>>> complexes;
     public:
-        ctype(string& i, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
+        complextype(string& i, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
             this->setIdent(i);
+            this->setType(i);
+            /*
+            ** iterate through complexes adding var and func sigs
+            ** determine vset on vsigs
+            ** {bear() : : bear.a in A /\ bear.b in B}
+            */
+        };
+        complextype(string& i, shared_ptr<type> s, unique_ptr<vector<unique_ptr<complexblock>>>& cs) {
+            this->setIdent(i);
+            supertype = s;
             this->setType(i);
             /*
             ** iterate through complexes adding var and func sigs
