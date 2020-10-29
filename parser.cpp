@@ -457,14 +457,78 @@ static TOKEN getNextToken() {
 /* parser: adds context to the program */
 type basetype = type("type");
 
-
 /*
-** Block -> IfStmt Block
-**        | ForStmt Block
-**        | WhileStmt Block
-**        | Expr Block
-**        | e
+** IfStmt -> if ( Expr ) { Block } ElseStmt
+**
+** ElseStmt -> else IfStmt
+**           | else { Block } ;
+**           | ;
 */
+
+unique_ptr<elsestmt> elsestmt_parse() {
+    if (curTok.type != TOKEN_TYPE::ELSE)
+        throw PolarParseException("else");
+    getNextToken();
+
+    switch (curTok.type) {
+        case TOKEN_TYPE::IF: {
+            unique_ptr<ifstmt> elseif = ifstmt_parse();
+            return make_unique<elsestmt>(new elsestmt(elseif));
+        };
+        case TOKEN_TYPE::LBRA: {
+            getNextToken();
+            unique_ptr<block> elseblock = block_parse();
+
+            if (curTok.type != TOKEN_TYPE::RBRA)
+                throw PolarParseException("}");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            return make_unique<elsestmt>(new elsestmt(elseblock));
+        };
+        default: {
+            throw PolarParseException("if' or '{");
+        };
+    };
+};
+
+
+unique_ptr<ifstmt> ifstmt_parse() {
+    if (curTok.type != TOKEN_TYPE::IF)
+        throw PolarParseException("if");
+    getNextToken();
+
+    if (curTok.type != TOKEN_TYPE::LPAR)
+        throw PolarParseException("(");
+    getNextToken();
+
+    unique_ptr<expr> ifcondition = expr_parse();
+
+    if (curTok.type != TOKEN_TYPE::LBRA)
+        throw PolarParseException("{");
+    getNextToken();
+
+    unique_ptr<block> ifblock = block_parse();
+
+    if (curTok.type != TOKEN_TYPE::RBRA)
+        throw PolarParseException("}");
+    getNextToken();
+
+    if (curTok.type == TOKEN_TYPE::ELSE) {
+        unique_ptr<elsestmt> elsestatement = elsestmt_parse();
+        return make_unique<ifstmt>(new ifstmt(ifcondition, ifblock, elsestatement));
+    };
+
+    if (curTok.type != TOKEN_TYPE::SEMICOLON)
+        throw PolarParseException(";");
+    getNextToken();
+
+    return make_unique<ifstmt>(new ifstmt(ifcondition, ifblock));
+};
+
 unique_ptr<block> block_parse() {
     vector<unique_ptr<stmt>> stmts = {};
     while (curTok.type != TOKEN_TYPE::RBRA) {

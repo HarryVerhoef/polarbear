@@ -217,25 +217,18 @@ class ifstmt : public stmt {
 
 class elsestmt : public stmt {
     private:
-        unique_ptr<expr> cond;
         unique_ptr<block> elseblock;
-        unique_ptr<elsestmt> estmt;
+        unique_ptr<ifstmt> istmt;
     public:
         elsestmt(unique_ptr<block>& b) {
             this->setType(AST_TYPE::ELSESTMT);
             elseblock = move(b);
         };
-        elsestmt(unique_ptr<expr>& c, unique_ptr<block>& b) {
+        elsestmt(unique_ptr<ifstmt>& i) {
             this->setType(AST_TYPE::ELSESTMT);
-            cond = move(c);
-            elseblock = move(b);
+            istmt = move(i);
         };
-        elsestmt(unique_ptr<expr>& c, unique_ptr<block>& b, unique_ptr<elsestmt>& e) {
-            this->setType(AST_TYPE::ELSESTMT);
-            cond = move(c);
-            elseblock = move(b);
-            estmt = move(e);
-        };
+
 };
 
 class forstmt : public stmt {
