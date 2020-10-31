@@ -232,10 +232,12 @@ class elsestmt : public stmt {
 };
 
 class forstmt : public stmt {
+    private:
+        unique_ptr<expr>
     public:
         forstmt() {
             this->setType(AST_TYPE::FORSTMT);
-        }
+        };
 };
 
 class foreach : public forstmt {
@@ -244,7 +246,7 @@ class foreach : public forstmt {
         unique_ptr<expr> iterable;
         unique_ptr<block> forblock;
     public:
-        foreach(string& i, unique_ptr<expr>& c, unique_ptr<block>& b) {
+        foreach(string i, unique_ptr<expr>& c, unique_ptr<block>& b) {
             this->setType(AST_TYPE::FOREACH);
             ident = i;
             iterable = move(c);

@@ -453,17 +453,95 @@ static TOKEN getNextToken() {
     return curTok = temp;
 };
 
+static void putBackToken(TOKEN tok) { tok_buffer.push_front(tok); }
 
 /* parser: adds context to the program */
 type basetype = type("type");
 
 /*
-** IfStmt -> if ( Expr ) { Block } ElseStmt
-**
-** ElseStmt -> else IfStmt
-**           | else { Block } ;
-**           | ;
+** ForStmt -> for ( ident : Expr ) { Block } ;
+**          | for ( Expr ; Expr ; Expr ) { Block } ;
 */
+unique_ptr<forstmt> forstmt_parse() {
+    if (curTok.type != TOKEN_TYPE::FOR)
+        throw PolarParseException("for");
+    getNextToken();
+
+    if (curTok.type != TOKEN_TYPE::LPAR)
+        throw PolarParseException("(");
+    getNextToken();
+
+    TOKEN firstParamFirstTok = curTok;
+
+    getNextToken();
+
+    switch(curTok.type) {
+        case TOKEN_TYPE::COLON: {
+            getNextToken();
+
+            unique_ptr<expr> foriterable = expr_parse();
+
+            if (curTok.type != TOKEN_TYPE::RPAR)
+                throw PolarParseException(")");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::LBRA)
+                throw PolarParseException("{");
+            getNextToken();
+
+            unique_ptr<block> forblock = block_parse();
+
+            if (curTok.type != TOKEN_TYPE::RBRA)
+                throw PolarParseException("}");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            return make_unique<foreach>(new foreach(firstParamFirstTok.lexeme, foriterable, forblock));
+
+        };
+        default: {
+            putBackToken(firstParamFirstTok);
+
+            unique_ptr<expr> expr1 = expr_parse();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            unique_ptr<expr> expr2 =  expr_parse();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            unique_ptr<expr> expr3 = expr_parse();
+
+            if (curTok.type != TOKEN_TYPE::RPAR)
+                throw PolarParseException(")");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::LBRA)
+                throw PolarParseException("{");
+            getNextToken();
+
+            unique_ptr<block> forblock = block_parse();
+
+            if (curTok.type != TOKEN_TYPE::RBRA)
+                throw PolarParseException("}");
+            getNextToken();
+
+            if (curTok.type != TOKEN_TYPE::SEMICOLON)
+                throw PolarParseException(";");
+            getNextToken();
+
+            return make_unique<forindex>(new forindex(expr1, expr2, expr3, forblock));
+        };
+    }
+
+};
 
 unique_ptr<elsestmt> elsestmt_parse() {
     if (curTok.type != TOKEN_TYPE::ELSE)
@@ -494,7 +572,6 @@ unique_ptr<elsestmt> elsestmt_parse() {
         };
     };
 };
-
 
 unique_ptr<ifstmt> ifstmt_parse() {
     if (curTok.type != TOKEN_TYPE::IF)
