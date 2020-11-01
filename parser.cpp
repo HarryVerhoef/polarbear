@@ -458,10 +458,85 @@ static void putBackToken(TOKEN tok) { tok_buffer.push_front(tok); }
 /* parser: adds context to the program */
 type basetype = type("type");
 
+
 /*
-** ForStmt -> for ( ident : Expr ) { Block } ;
-**          | for ( Expr ; Expr ; Expr ) { Block } ;
+** Expr -> Type ident = Expr ;
+**       | Logic
+**
+** Logic -> Or LogicP
+** LogicP -> <==> Or LogicP
+**         | <= { Set } => Or LogicP
+**         | ==> Or LogicP
+**         | ==> { Set } Or LogicP
+**
+** Or -> And OrP
+** OrP -> \/ And OrP
+**      | e
+**
+** And -> In AndP
+** AndP -> /\ In AndP
+**       | e
+**
+** In -> Eq InP
+** InP -> in Eq InP
+**      | e
 */
+
+unique_ptr<expr> logicp(unique_ptr<expr>& lhs) {
+    switch(curTok.type) {
+        case TOKEN_TYPE::EQUIV: {
+
+        };
+        case TOKEN_TYPE::LEQ: {
+
+        };
+        case TOKEN_TYPE::IMPLIES: {
+
+        };
+        default: {
+
+        };
+    };
+};
+
+unique_ptr<expr> expr_parse() {
+    unique_ptr<expr> lhs = or();
+    unique_ptr<expr> expression = logicp(lhs);
+    return expression;
+};
+
+unique_ptr<whilestmt> while_parse() {
+    if (curTok.type != TOKEN_TYPE::WHILE)
+        throw PolarParseException("while");
+    getNextToken();
+
+    if (curTok.type != TOKEN_TYPE::LPAR)
+        throw PolarParseException("(");
+    getNextToken();
+
+    unique_ptr<expr> whilecond = expr_parse();
+
+    if (curTok.type != TOKEN_TYPE::RPAR)
+        throw PolarParseException(")");
+    getNextToken();
+
+    if (curTok.type != TOKEN_TYPE::LBRA)
+        throw PolarParseException("{");
+    getNextToken();
+
+    unique_ptr<block> whileblock = block_parse();
+
+    if (curTok.type != TOKEN_TYPE::RBRA)
+        throw PolarParseException("}");
+    getNextToken();
+
+    if (curTok.type != TOKEN_TYPE::SEMICOLON)
+        throw PolarParseException(";");
+    getNextToken();
+
+    return make_unique<whilestmt>(new whilestmt(whilecond, whileblock));
+};
+
 unique_ptr<forstmt> forstmt_parse() {
     if (curTok.type != TOKEN_TYPE::FOR)
         throw PolarParseException("for");
@@ -539,8 +614,7 @@ unique_ptr<forstmt> forstmt_parse() {
 
             return make_unique<forindex>(new forindex(expr1, expr2, expr3, forblock));
         };
-    }
-
+    };
 };
 
 unique_ptr<elsestmt> elsestmt_parse() {
