@@ -23,7 +23,7 @@ class astnode {
 
 class program : public astnode {
     private:
-        unordered_map<string, shared_ptr<op>> opmap = {};
+        static unordered_map<string, shared_ptr<op>> opmap;
         unique_ptr<vector<unique_ptr<def>>> defs = {};
     public:
         program() {
@@ -40,8 +40,6 @@ class program : public astnode {
 };
 
 class def : public program {
-    private:
-        string test = "";
     public:
         def() {
             this->setType(AST_TYPE::DEF);

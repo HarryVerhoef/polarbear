@@ -460,10 +460,8 @@ type basetype = type("type");
 
 
 /*
-** Expr -> Type ident = Expr ;
-**       | Logic
+** Expr -> Or LogicP ;
 **
-** Logic -> Or LogicP
 ** LogicP -> <==> Or LogicP
 **         | <= { Set } => Or LogicP
 **         | ==> Or LogicP
@@ -482,15 +480,36 @@ type basetype = type("type");
 **      | e
 */
 
+
+
+unique_ptr<expr> or_parse() {
+    unique_ptr<expr> lhs = and_prod();
+    unique_ptr<expr> expression = orp(lhs);
+    return expression;
+};
+
 unique_ptr<expr> logicp(unique_ptr<expr>& lhs) {
     switch(curTok.type) {
         case TOKEN_TYPE::EQUIV: {
-            unique_ptr<expr> eorxpr = or_parse();
+            unique_ptr<expr> orexpr = or_parse();
             unique_ptr<expr> nested = logicp(orexpr);
-            return make_unique<expr>(new binop(lhs, ))
+            shared_ptr<type> opreturntype = basetype.getType("bool");
+            shared_ptr<type> operand1type = basetype.getType("bool");
+            shared_ptr<type> operand2type = basetype.getType("bool");
+            vector<shared_ptr<type>> optypes = {operand1type, operand2type};
+            shared_ptr<op> op_ptr = make_shared<op>(new op(PRIMITIVE_OP::EQUIV, opreturntype, optypes));
+            return make_unique<expr>(new binop(lhs, nested, op_ptr))
         };
         case TOKEN_TYPE::LEQ: {
+            /* TODO: Op could easily be leq, need to check and push_front if necessary */
 
+
+            
+            unique_ptr<polarset> subdomain = set_parse();
+            if (curTok.type != TOKEN_TYPE::GEQ)
+                throw PolarParseException("=>");
+            
+            
         };
         case TOKEN_TYPE::IMPLIES: {
 
@@ -504,6 +523,10 @@ unique_ptr<expr> logicp(unique_ptr<expr>& lhs) {
 unique_ptr<expr> expr_parse() {
     unique_ptr<expr> lhs = or();
     unique_ptr<expr> expression = logicp(lhs);
+
+    if (curTok.type != TOKEN_TYPE::SEMICOLON)
+        throw PolarParseException(";");
+    
     return expression;
 };
 

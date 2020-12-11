@@ -20,6 +20,11 @@ class op {
             argc = optypes.size();
             optypes = os;
         };
+        op(PRIMITIVE_OP pt, shared_ptr<type> t, vector<shared_ptr<type>>& os) {
+            returntype = t;
+            argc = optypes.size();
+            optypes = os;
+        };
         string getStringSig() {
             string s = returntype->getIdent() + "-" + lexeme;
             for (shared_ptr<type> t : optypes) {
@@ -97,4 +102,12 @@ class abstractpolarset : public polarset {
             condition = move(c);
         };
 };
+
+
+unordered_map<shared_ptr<opsig>, shared_ptr<op>> defineprimitiveops() {
+    unordered_map<shared_ptr<opsig>, shared_ptr<op>> map = {};
+    for (int i = PRIMITIVE_OP::EQUIV; i != PRIMITIVE_OP::LAST; i++) {
+        opsig signature = new opsig()
+    }
+}
 
