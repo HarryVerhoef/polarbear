@@ -485,7 +485,9 @@ type basetype = type("type");
 unique_ptr<expr> logicp(unique_ptr<expr>& lhs) {
     switch(curTok.type) {
         case TOKEN_TYPE::EQUIV: {
-
+            unique_ptr<expr> eorxpr = or_parse();
+            unique_ptr<expr> nested = logicp(orexpr);
+            return make_unique<expr>(new binop(lhs, ))
         };
         case TOKEN_TYPE::LEQ: {
 

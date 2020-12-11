@@ -23,6 +23,7 @@ class astnode {
 
 class program : public astnode {
     private:
+        unordered_map<string, shared_ptr<op>> opmap = {};
         unique_ptr<vector<unique_ptr<def>>> defs = {};
     public:
         program() {
@@ -32,6 +33,10 @@ class program : public astnode {
             this->setType(AST_TYPE::PROGRAM);
             defs = move(d);
         };
+        void addOp(op& o) {
+            opmap[o.getStringSig()] = make_shared<op>(o);
+        };
+        shared_ptr<op> getOp(string s) { return opmap[s]; };
 };
 
 class def : public program {
@@ -293,13 +298,13 @@ class binop : public expr {
     private:
         unique_ptr<expr> operand1;
         unique_ptr<expr> operand2;
-        unique_ptr<op> operation;
+        shared_ptr<op> operation;
     public:
-        binop(unique_ptr<expr>& a1, unique_ptr<expr>& a2, unique_ptr<op>& o) {
+        binop(unique_ptr<expr>& a1, unique_ptr<expr>& a2, shared_ptr<op> o) {
             this->setType(AST_TYPE::BINOP);
             operand1 = move(a1);
             operand2 = move(a2);
-            operation = move(o);
+            operation = o;
         };
 };
 

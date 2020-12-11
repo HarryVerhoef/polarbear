@@ -11,17 +11,23 @@ class op {
     private:
         int argc = 0;
         string lexeme;
-        vector<type> optypes = {};
-        TOKEN_TYPE default_op = TOKEN_TYPE::UNKNOWN;
+        shared_ptr<type> returntype;
+        vector<shared_ptr<type>> optypes = {};
     public:
-        op(string l, vector<type>& os) {
+        op(string l, shared_ptr<type> t, vector<shared_ptr<type>>& os) {
             lexeme = l;
+            returntype = t;
             argc = optypes.size();
             optypes = os;
         };
-        op(TOKEN_TYPE t) {
-            default_op = t;
+        string getStringSig() {
+            string s = returntype->getIdent() + "-" + lexeme;
+            for (shared_ptr<type> t : optypes) {
+                s += "-" + t->getIdent();
+            };
+            return s;
         };
+
 };
 
 class domain {
