@@ -40,6 +40,8 @@ class program : public astnode {
 };
 
 class def : public program {
+    private:
+        string test = "";
     public:
         def() {
             this->setType(AST_TYPE::DEF);
